@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Search, User, Heart, ShoppingCart, Menu, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 import { toast } from 'sonner';
 
 const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [cartItemCount] = useState(2);
   const [wishlistCount] = useState(3);
   const { user, userProfile, signOut } = useAuth();
+  const { cartItemCount } = useCart();
   const navigate = useNavigate();
   
   const navigationItems = ['Sale', 'Makeup', 'Skincare', 'Home', 'Shoes', 'Handbags', 'Accessories', 'Clothing', 'Kids', 'Men', 'Minis', 'Designer'];
