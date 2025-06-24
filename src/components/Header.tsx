@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,44 +5,27 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Search, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [cartItemCount] = useState(2);
   const [wishlistCount] = useState(3);
-
-  const navigationItems = [
-    'Sale', 'Makeup', 'Skincare', 'Home', 'Shoes', 
-    'Handbags', 'Accessories', 'Clothing', 'Kids', 'Men', 'Minis', 'Designer'
-  ];
-
-  const NavigationMenu = ({ mobile = false }) => (
-    <nav className={mobile ? "flex flex-col space-y-4" : "hidden lg:flex lg:items-center lg:space-x-8"}>
-      {navigationItems.map((item) => (
-        <Link
-          key={item}
-          to={`/products?category=${item.toLowerCase()}`}
-          className={`${
-            mobile ? 'text-lg font-medium py-2' : 'text-sm font-medium'
-          } text-gray-700 hover:text-pink-600 transition-colors relative group`}
-        >
+  const navigationItems = ['Sale', 'Makeup', 'Skincare', 'Home', 'Shoes', 'Handbags', 'Accessories', 'Clothing', 'Kids', 'Men', 'Minis', 'Designer'];
+  const NavigationMenu = ({
+    mobile = false
+  }) => <nav className={mobile ? "flex flex-col space-y-4" : "hidden lg:flex lg:items-center lg:space-x-8"}>
+      {navigationItems.map(item => <Link key={item} to={`/products?category=${item.toLowerCase()}`} className={`${mobile ? 'text-lg font-medium py-2' : 'text-sm font-medium'} text-gray-700 hover:text-pink-600 transition-colors relative group`}>
           {item}
-          {item === 'Sale' && (
-            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 py-0">
+          {item === 'Sale' && <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 py-0">
               Hot
-            </Badge>
-          )}
+            </Badge>}
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-pink-600 transition-all duration-200 group-hover:w-full"></span>
-        </Link>
-      ))}
-    </nav>
-  );
-
-  return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+        </Link>)}
+    </nav>;
+  return <header className="bg-white shadow-sm sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-center py-2 text-sm">
-        <p>Free shipping on orders over ৳5000 | Use code: FREESHIP</p>
+        <p>
+      </p>
       </div>
       
       {/* Main Header */}
@@ -51,25 +33,14 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/6d21888a-b154-49d2-a4c3-2fb2c377f1da.png" 
-              alt="SIA Collections Logo"
-              className="h-10 w-auto"
-            />
+            <img src="/lovable-uploads/6d21888a-b154-49d2-a4c3-2fb2c377f1da.png" alt="SIA Collections Logo" className="h-10 w-auto" />
           </Link>
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className={`relative w-full transition-all duration-200 ${
-              isSearchFocused ? 'transform scale-105' : ''
-            }`}>
+            <div className={`relative w-full transition-all duration-200 ${isSearchFocused ? 'transform scale-105' : ''}`}>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search products..."
-                className="pl-10 pr-4 w-full rounded-full border-2 border-gray-200 focus:border-pink-500 transition-colors"
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
+              <Input placeholder="Search products..." className="pl-10 pr-4 w-full rounded-full border-2 border-gray-200 focus:border-pink-500 transition-colors" onFocus={() => setIsSearchFocused(true)} onBlur={() => setIsSearchFocused(false)} />
             </div>
           </div>
 
@@ -86,11 +57,9 @@ const Header = () => {
             {/* Wishlist */}
             <Button variant="ghost" size="icon" className="relative hover:bg-pink-50">
               <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+              {wishlistCount > 0 && <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
                   {wishlistCount}
-                </Badge>
-              )}
+                </Badge>}
               <span className="sr-only">Wishlist</span>
             </Button>
 
@@ -98,11 +67,9 @@ const Header = () => {
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative hover:bg-pink-50">
                 <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                {cartItemCount > 0 && <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
                     {cartItemCount}
-                  </Badge>
-                )}
+                  </Badge>}
                 <span className="sr-only">Cart</span>
               </Button>
             </Link>
@@ -121,10 +88,7 @@ const Header = () => {
                   <div className="mb-6">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Search products..."
-                        className="pl-10 pr-4 w-full"
-                      />
+                      <Input placeholder="Search products..." className="pl-10 pr-4 w-full" />
                     </div>
                   </div>
 
@@ -155,8 +119,6 @@ const Header = () => {
           <NavigationMenu />
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
