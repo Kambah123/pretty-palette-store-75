@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
-import { ProductReviews } from "@/components/product/ProductReviews";
+import { ProductRatingSystem } from "@/components/product/ProductRatingSystem";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
-import { ShoppingCart, Heart, Share2, Star } from "lucide-react";
+import { ShoppingCart, Heart, Share2, Star, ArrowLeft } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 // Mock product data
 const mockProduct = {
@@ -51,6 +52,52 @@ const mockProduct = {
   }
 };
 
+// Mock reviews data
+const mockReviews = [
+  {
+    id: 1,
+    author: "John D.",
+    rating: 5,
+    title: "Excellent sound quality!",
+    content: "These headphones exceeded my expectations. The noise cancellation is fantastic and the battery life is incredible. Highly recommend!",
+    date: "2024-01-15",
+    verified: true,
+    helpful: 12,
+    unhelpful: 1,
+    images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop"]
+  },
+  {
+    id: 2,
+    author: "Sarah M.",
+    rating: 4,
+    title: "Great headphones, minor comfort issue",
+    content: "Sound quality is amazing and the build quality feels premium. Only issue is they can get a bit uncomfortable after 3-4 hours of continuous use.",
+    date: "2024-01-10",
+    verified: true,
+    helpful: 8,
+    unhelpful: 0
+  },
+  {
+    id: 3,
+    author: "Mike R.",
+    rating: 5,
+    title: "Perfect for travel",
+    content: "The noise cancellation makes flights so much more enjoyable. Battery lasts for my entire overseas trips. Worth every penny!",
+    date: "2024-01-05",
+    verified: false,
+    helpful: 15,
+    unhelpful: 2
+  }
+];
+
+const mockRatingDistribution = {
+  5: 620,
+  4: 287,
+  3: 189,
+  2: 98,
+  1: 53
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
@@ -86,15 +133,25 @@ const ProductDetail = () => {
       {/* Breadcrumb */}
       <div className="bg-gray-50 py-4">
         <div className="max-w-7xl mx-auto px-4">
-          <nav className="text-sm text-gray-600">
-            <span>Home</span> / <span>Electronics</span> / <span>Headphones</span> / 
-            <span className="text-gray-900 font-medium"> {mockProduct.name}</span>
-          </nav>
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link to="/" className="hover:text-pink-600">Home</Link>
+            <span>/</span>
+            <Link to="/products" className="hover:text-pink-600">Products</Link>
+            <span>/</span>
+            <span>{mockProduct.category}</span>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">{mockProduct.name}</span>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <Link to="/products" className="inline-flex items-center text-pink-600 hover:text-pink-700 mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Products
+        </Link>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Product Images */}
           <div>
             <ProductImageGallery images={mockProduct.images} productName={mockProduct.name} />
@@ -104,7 +161,7 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div>
               <Badge variant="secondary" className="mb-2">{mockProduct.category}</Badge>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{mockProduct.name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{mockProduct.name}</h1>
               <p className="text-gray-600 mb-4">by {mockProduct.brand}</p>
               
               {/* Rating */}
@@ -117,11 +174,11 @@ const ProductDetail = () => {
 
               {/* Price */}
               <div className="flex items-center space-x-4 mb-6">
-                <span className="text-3xl font-bold text-gray-900">
+                <span className="text-2xl lg:text-3xl font-bold text-gray-900">
                   ${mockProduct.price}
                 </span>
                 {mockProduct.originalPrice && (
-                  <span className="text-xl text-gray-500 line-through">
+                  <span className="text-lg lg:text-xl text-gray-500 line-through">
                     ${mockProduct.originalPrice}
                   </span>
                 )}
@@ -159,22 +216,24 @@ const ProductDetail = () => {
                   <label className="font-medium">Quantity:</label>
                   <div className="flex items-center border rounded-md">
                     <button 
-                      className="px-3 py-2 hover:bg-gray-100"
+                      className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
                     >
                       -
                     </button>
-                    <span className="px-4 py-2 border-x">{quantity}</span>
+                    <span className="px-4 py-2 border-x min-w-[60px] text-center">{quantity}</span>
                     <button 
-                      className="px-3 py-2 hover:bg-gray-100"
+                      className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
                       onClick={() => setQuantity(quantity + 1)}
+                      disabled={quantity >= mockProduct.stockCount}
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                   <Button 
                     className="flex-1" 
                     size="lg"
@@ -267,11 +326,19 @@ const ProductDetail = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Reviews Section */}
-        <ProductReviews productId={mockProduct.id} />
+        {/* Enhanced Reviews Section */}
+        <ProductRatingSystem 
+          productId={mockProduct.id}
+          averageRating={mockProduct.rating}
+          totalReviews={mockProduct.reviewCount}
+          reviews={mockReviews}
+          ratingDistribution={mockRatingDistribution}
+        />
 
         {/* Related Products */}
-        <RelatedProducts currentProductId={mockProduct.id} category={mockProduct.category} />
+        <div className="mt-12">
+          <RelatedProducts currentProductId={mockProduct.id} category={mockProduct.category} />
+        </div>
       </div>
     </div>
   );
