@@ -1,110 +1,161 @@
 
 import React, { useState } from 'react';
-import { Search, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Search, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [cartItemCount] = useState(2);
+  const [wishlistCount] = useState(3);
 
-  const categories = [
-    'Sale', 'Makeup', 'Skincare', 'Home', 'Shoes', 'Handbags', 
-    'Accessories', 'Clothing', 'Kids', 'Men', 'Minis', 'Designer'
+  const navigationItems = [
+    'Sale', 'Makeup', 'Skincare', 'Home', 'Shoes', 
+    'Handbags', 'Accessories', 'Clothing', 'Kids', 'Men', 'Minis', 'Designer'
   ];
 
+  const NavigationMenu = ({ mobile = false }) => (
+    <nav className={mobile ? "flex flex-col space-y-4" : "hidden lg:flex lg:items-center lg:space-x-8"}>
+      {navigationItems.map((item) => (
+        <Link
+          key={item}
+          to={`/products?category=${item.toLowerCase()}`}
+          className={`${
+            mobile ? 'text-lg font-medium py-2' : 'text-sm font-medium'
+          } text-gray-700 hover:text-pink-600 transition-colors relative group`}
+        >
+          {item}
+          {item === 'Sale' && (
+            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 py-0">
+              Hot
+            </Badge>
+          )}
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-pink-600 transition-all duration-200 group-hover:w-full"></span>
+        </Link>
+      ))}
+    </nav>
+  );
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="bg-white shadow-sm sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-center py-2 text-sm">
-        Free shipping on orders over ৳2000 | Shop now and save big!
+        <p>Free shipping on orders over ৳5000 | Use code: FREESHIP</p>
       </div>
-
+      
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-              BeautyStore
-            </h1>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">S</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              SIA Collections
+            </span>
+          </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <div className={`relative w-full transition-all duration-200 ${
+              isSearchFocused ? 'transform scale-105' : ''
+            }`}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                type="text"
                 placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full border-gray-300 focus:border-pink-400 focus:ring-pink-400 rounded-full"
+                className="pl-10 pr-4 w-full rounded-full border-2 border-gray-200 focus:border-pink-500 transition-colors"
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
               />
             </div>
           </div>
 
-          {/* Action Icons */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="hover:bg-pink-50 hover:text-pink-600 transition-colors">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-pink-50 hover:text-pink-600 transition-colors relative">
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-4">
+            {/* Account */}
+            <Link to="/account">
+              <Button variant="ghost" size="icon" className="relative hover:bg-pink-50">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Account</span>
+              </Button>
+            </Link>
+
+            {/* Wishlist */}
+            <Button variant="ghost" size="icon" className="relative hover:bg-pink-50">
               <Heart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                3
-              </span>
+              {wishlistCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                  {wishlistCount}
+                </Badge>
+              )}
+              <span className="sr-only">Wishlist</span>
             </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-pink-50 hover:text-pink-600 transition-colors relative">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                2
-              </span>
-            </Button>
-            
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden hover:bg-pink-50 hover:text-pink-600"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+
+            {/* Cart */}
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative hover:bg-pink-50">
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                    {cartItemCount}
+                  </Badge>
+                )}
+                <span className="sr-only">Cart</span>
+              </Button>
+            </Link>
+
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:w-96">
+                <div className="flex flex-col h-full">
+                  {/* Mobile Search */}
+                  <div className="mb-6">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search products..."
+                        className="pl-10 pr-4 w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile Navigation */}
+                  <NavigationMenu mobile />
+
+                  {/* Mobile Action Buttons */}
+                  <div className="mt-auto pt-6 border-t space-y-4">
+                    <Link to="/login" className="block">
+                      <Button className="w-full bg-pink-600 hover:bg-pink-700">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/register" className="block">
+                      <Button variant="outline" className="w-full">
+                        Create Account
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        <div className="md:hidden mt-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-3 w-full border-gray-300 focus:border-pink-400 focus:ring-pink-400 rounded-full"
-            />
-          </div>
+        {/* Desktop Navigation */}
+        <div className="border-t border-gray-200 py-4">
+          <NavigationMenu />
         </div>
       </div>
-
-      {/* Navigation Menu */}
-      <nav className={`border-t border-gray-200 ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:justify-center md:space-x-8 py-4">
-            {categories.map((category) => (
-              <a
-                key={category}
-                href="#"
-                className="px-4 py-2 text-gray-700 hover:text-pink-600 font-medium transition-colors hover:bg-pink-50 rounded-md"
-              >
-                {category}
-              </a>
-            ))}
-          </div>
-        </div>
-      </nav>
     </header>
   );
 };
