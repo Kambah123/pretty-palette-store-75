@@ -1,12 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,15 +20,60 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { signUp, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Registration attempt:', formData);
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await signUp(
+        formData.email, 
+        formData.password, 
+        formData.firstName, 
+        formData.lastName
+      );
+      
+      if (error) {
+        if (error.message.includes('already registered')) {
+          toast.error('An account with this email already exists');
+        } else {
+          toast.error(error.message || 'Failed to create account');
+        }
+      } else {
+        toast.success('Account created successfully! Please check your email to verify your account.');
+        navigate('/login');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,6 +100,7 @@ const Register = () => {
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     placeholder="First name"
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 <div>
@@ -63,6 +111,7 @@ const Register = () => {
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     placeholder="Last name"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -76,6 +125,7 @@ const Register = () => {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="Enter your email"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
@@ -89,6 +139,7 @@ const Register = () => {
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     placeholder="Create a password"
                     required
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
@@ -96,6 +147,7 @@ const Register = () => {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-gray-400" />
@@ -116,6 +168,7 @@ const Register = () => {
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     placeholder="Confirm your password"
                     required
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
@@ -123,6 +176,7 @@ const Register = () => {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={isLoading}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4 text-gray-400" />
@@ -147,8 +201,12 @@ const Register = () => {
                 </p>
               </div>
               
-              <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700">
-                Create Account
+              <Button 
+                type="submit" 
+                className="w-full bg-pink-600 hover:bg-pink-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
             

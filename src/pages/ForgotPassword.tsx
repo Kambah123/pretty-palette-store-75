@@ -6,15 +6,33 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { resetPassword } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password reset requested for:', email);
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        toast.error(error.message || 'Failed to send reset email');
+      } else {
+        setIsSubmitted(true);
+        toast.success('Password reset email sent!');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isSubmitted) {
@@ -90,11 +108,16 @@ const ForgotPassword = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
-              <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700">
-                Send Reset Instructions
+              <Button 
+                type="submit" 
+                className="w-full bg-pink-600 hover:bg-pink-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send Reset Instructions'}
               </Button>
             </form>
             
