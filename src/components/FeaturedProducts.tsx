@@ -9,7 +9,7 @@ const FeaturedProducts = () => {
   const featuredProducts = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Beauty',
       name: 'Professional Makeup Kit Set',
       rating: 4.8,
@@ -20,7 +20,7 @@ const FeaturedProducts = () => {
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Skincare',
       name: 'Vitamin C Skin Care Set',
       rating: 4.9,
@@ -31,7 +31,7 @@ const FeaturedProducts = () => {
     },
     {
       id: 3,
-      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Fashion',
       name: 'Designer Leather Handbag',
       rating: 4.7,
@@ -42,7 +42,7 @@ const FeaturedProducts = () => {
     },
     {
       id: 4,
-      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Style',
       name: 'Premium Running Shoes',
       rating: 4.6,
@@ -53,7 +53,7 @@ const FeaturedProducts = () => {
     },
     {
       id: 5,
-      image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Beauty',
       name: 'Luxury Lipstick Collection',
       rating: 4.9,
@@ -64,7 +64,7 @@ const FeaturedProducts = () => {
     },
     {
       id: 6,
-      image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop&auto=format',
       brand: 'SIA Fashion',
       name: 'Elegant Evening Dress',
       rating: 4.8,
@@ -115,6 +115,7 @@ const FeaturedProducts = () => {
                     src={product.image}
                     alt={product.name}
                     className="w-full h-64 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
                   />
                   {product.isFeatured && (
                     <Badge className="absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white">

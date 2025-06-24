@@ -50,13 +50,12 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              SIA Collections
-            </span>
+          <Link to="/" className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/6d21888a-b154-49d2-a4c3-2fb2c377f1da.png" 
+              alt="SIA Collections Logo"
+              className="h-10 w-auto"
+            />
           </Link>
 
           {/* Search Bar - Desktop */}
