@@ -7,10 +7,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, CreditCard, Truck, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Checkout = () => {
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -19,17 +24,16 @@ const Checkout = () => {
     city: '',
     zipCode: '',
     phone: '',
-    paymentMethod: 'card',
+    paymentMethod: 'bkash',
     shippingMethod: 'standard'
   });
 
-  const cartItems = [
-    { id: 1, name: 'Professional Makeup Kit Set', price: 4500, quantity: 1, image: '/placeholder.svg' },
-    { id: 2, name: 'Vitamin C Skin Care Set', price: 3200, quantity: 2, image: '/placeholder.svg' }
-  ];
+  const { cartItems, clearCart } = useCart();
+  const { user, userProfile } = useAuth();
+  const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 150;
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const shipping = formData.shippingMethod === 'express' ? 300 : 150;
   const total = subtotal + shipping;
 
   const handleNext = () => {
@@ -44,13 +48,127 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const createOrder = async () => {
+    if (!user || !userProfile) {
+      toast.error('Please log in to place an order');
+      return null;
+    }
+
+    try {
+      // Create order in database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: userProfile.id,
+          total_amount: total,
+          status: 'pending',
+          payment_status: 'pending',
+          payment_method: formData.paymentMethod,
+          shipping_address: `${formData.firstName} ${formData.lastName}, ${formData.address}, ${formData.city}, ${formData.zipCode}`,
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Order creation error:', orderError);
+        throw new Error('Failed to create order');
+      }
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) {
+        console.error('Order items creation error:', itemsError);
+        throw new Error('Failed to create order items');
+      }
+
+      return orderData;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error('Failed to create order');
+      return null;
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!formData.firstName || !formData.lastName || !formData.address || !formData.city || !formData.phone) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const order = await createOrder();
+      if (!order) return;
+
+      if (formData.paymentMethod === 'bkash') {
+        // Process bKash payment
+        const { data, error } = await supabase.functions.invoke('bkash-payment', {
+          body: {
+            amount: total,
+            orderId: order.id,
+            customerPhone: formData.phone,
+            customerName: `${formData.firstName} ${formData.lastName}`
+          }
+        });
+
+        if (error) {
+          console.error('bKash payment error:', error);
+          toast.error('Failed to initiate bKash payment');
+          return;
+        }
+
+        // Redirect to bKash payment page
+        if (data.bkashURL) {
+          window.location.href = data.bkashURL;
+        } else {
+          toast.error('Failed to get bKash payment URL');
+        }
+      } else {
+        // Cash on Delivery
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({
+            status: 'confirmed',
+            payment_status: 'pending'
+          })
+          .eq('id', order.id);
+
+        if (updateError) {
+          console.error('Order update error:', updateError);
+          toast.error('Failed to confirm order');
+          return;
+        }
+
+        await clearCart();
+        toast.success('Order placed successfully!');
+        navigate('/account?tab=orders');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-pink-600 hover:text-pink-700 mb-4">
+          <Link to="/cart" className="inline-flex items-center text-pink-600 hover:text-pink-700 mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Shopping
+            Back to Cart
           </Link>
           
           {/* Progress Steps */}
@@ -84,46 +202,52 @@ const Checkout = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">First Name *</Label>
                       <Input 
                         id="firstName" 
                         value={formData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">Last Name *</Label>
                       <Input 
                         id="lastName" 
                         value={formData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        required
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="phone">Phone Number *</Label>
                     <Input 
-                      id="email" 
-                      type="email" 
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      id="phone" 
+                      type="tel" 
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="01XXXXXXXXX"
+                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address">Address *</Label>
                     <Input 
                       id="address" 
                       value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
+                      required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city">City *</Label>
                       <Input 
                         id="city" 
                         value={formData.city}
                         onChange={(e) => handleInputChange('city', e.target.value)}
+                        required
                       />
                     </div>
                     <div>
@@ -179,33 +303,20 @@ const Checkout = () => {
                 <CardContent className="space-y-4">
                   <RadioGroup value={formData.paymentMethod} onValueChange={(value) => handleInputChange('paymentMethod', value)}>
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card">Credit/Debit Card</Label>
+                      <RadioGroupItem value="bkash" id="bkash" />
+                      <Label htmlFor="bkash" className="flex-1">
+                        <div>bKash Payment</div>
+                        <div className="text-sm text-gray-500">Pay securely with bKash</div>
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
                       <RadioGroupItem value="cod" id="cod" />
-                      <Label htmlFor="cod">Cash on Delivery</Label>
+                      <Label htmlFor="cod" className="flex-1">
+                        <div>Cash on Delivery</div>
+                        <div className="text-sm text-gray-500">Pay when you receive your order</div>
+                      </Label>
                     </div>
                   </RadioGroup>
-                  
-                  {formData.paymentMethod === 'card' && (
-                    <div className="space-y-4 mt-4">
-                      <div>
-                        <Label htmlFor="cardNumber">Card Number</Label>
-                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="expiry">Expiry Date</Label>
-                          <Input id="expiry" placeholder="MM/YY" />
-                        </div>
-                        <div>
-                          <Label htmlFor="cvv">CVV</Label>
-                          <Input id="cvv" placeholder="123" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )}
@@ -221,6 +332,7 @@ const Checkout = () => {
                       <h4 className="font-semibold mb-2">Shipping Address</h4>
                       <p className="text-sm text-gray-600">
                         {formData.firstName} {formData.lastName}<br />
+                        {formData.phone}<br />
                         {formData.address}<br />
                         {formData.city}, {formData.zipCode}
                       </p>
@@ -228,7 +340,13 @@ const Checkout = () => {
                     <div>
                       <h4 className="font-semibold mb-2">Payment Method</h4>
                       <p className="text-sm text-gray-600">
-                        {formData.paymentMethod === 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}
+                        {formData.paymentMethod === 'bkash' ? 'bKash Payment' : 'Cash on Delivery'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Shipping Method</h4>
+                      <p className="text-sm text-gray-600">
+                        {formData.shippingMethod === 'express' ? 'Express Delivery (2-3 days)' : 'Standard Delivery (5-7 days)'}
                       </p>
                     </div>
                   </div>
@@ -241,15 +359,16 @@ const Checkout = () => {
               <Button 
                 variant="outline" 
                 onClick={handleBack}
-                disabled={step === 1}
+                disabled={step === 1 || loading}
               >
                 Back
               </Button>
               <Button 
-                onClick={handleNext}
+                onClick={step === 4 ? handlePlaceOrder : handleNext}
                 className="bg-pink-600 hover:bg-pink-700"
+                disabled={loading}
               >
-                {step === 4 ? 'Place Order' : 'Continue'}
+                {loading ? 'Processing...' : (step === 4 ? 'Place Order' : 'Continue')}
               </Button>
             </div>
           </div>
@@ -263,12 +382,16 @@ const Checkout = () => {
               <CardContent className="space-y-4">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center space-x-3">
-                    <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                    <img 
+                      src={item.product.images[0] || '/placeholder.svg'} 
+                      alt={item.product.name} 
+                      className="w-12 h-12 object-cover rounded" 
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{item.name}</p>
+                      <p className="text-sm font-medium truncate">{item.product.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-medium">৳{item.price * item.quantity}</p>
+                    <p className="text-sm font-medium">৳{item.product.price * item.quantity}</p>
                   </div>
                 ))}
                 

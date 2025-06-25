@@ -13,6 +13,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutFailed from "./pages/CheckoutFailed";
 import Products from "./pages/Products";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
@@ -44,6 +46,8 @@ const App = () => (
                   <Checkout />
                 </ProtectedRoute>
               } />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/checkout/failed" element={<CheckoutFailed />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/account" element={
