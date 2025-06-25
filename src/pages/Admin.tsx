@@ -4,39 +4,111 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Package, ShoppingCart, Users, TrendingUp } from "lucide-react";
-import { ProductForm } from "@/components/admin/ProductForm";
-import { OrderManagement } from "@/components/admin/OrderManagement";
-
-// Mock data for demonstration
-const mockProducts = [
-  { id: 1, name: "Wireless Headphones", category: "Electronics", price: 99.99, stock: 25, status: "Active" },
-  { id: 2, name: "Smart Watch", category: "Electronics", price: 199.99, stock: 15, status: "Active" },
-  { id: 3, name: "Laptop Stand", category: "Accessories", price: 49.99, stock: 0, status: "Out of Stock" },
-];
-
-const mockOrders = [
-  { id: "ORD-001", customer: "John Doe", total: 299.97, status: "Processing", items: 3 },
-  { id: "ORD-002", customer: "Jane Smith", total: 99.99, status: "Shipped", items: 1 },
-  { id: "ORD-003", customer: "Bob Johnson", total: 149.98, status: "Delivered", items: 2 },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { AdminProductForm } from "@/components/admin/AdminProductForm";
+import { AdminOrderManagement } from "@/components/admin/AdminOrderManagement";
 
 const Admin = () => {
   const [showProductForm, setShowProductForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const queryClient = useQueryClient();
+
+  // Fetch products
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ['admin-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Fetch orders
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          users (first_name, last_name, email),
+          order_items (quantity, price, products (name))
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Fetch users count
+  const { data: usersCount = 0 } = useQuery({
+    queryKey: ['admin-users-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  // Calculate stats
+  const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total_amount), 0);
+  const totalProducts = products.length;
+  const totalOrders = orders.length;
+
+  // Delete product mutation
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      toast.success('Product deleted successfully');
+    },
+    onError: (error) => {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
+  });
 
   const handleEditProduct = (product: any) => {
     setEditingProduct(product);
     setShowProductForm(true);
   };
 
-  const handleDeleteProduct = (productId: number) => {
-    console.log('Deleting product:', productId);
-    // In a real app, this would make an API call
+  const handleDeleteProduct = (productId: string) => {
+    if (confirm('Are you sure you want to delete this product?')) {
+      deleteProductMutation.mutate(productId);
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'default';
+      case 'inactive':
+        return 'secondary';
+      case 'out_of_stock':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
   };
 
   return (
@@ -55,8 +127,7 @@ const Admin = () => {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">245</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <div className="text-2xl font-bold">{totalProducts}</div>
             </CardContent>
           </Card>
           <Card>
@@ -65,8 +136,7 @@ const Admin = () => {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
+              <div className="text-2xl font-bold">{totalOrders}</div>
             </CardContent>
           </Card>
           <Card>
@@ -75,8 +145,7 @@ const Admin = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">892</div>
-              <p className="text-xs text-muted-foreground">+23% from last month</p>
+              <div className="text-2xl font-bold">{usersCount}</div>
             </CardContent>
           </Card>
           <Card>
@@ -85,8 +154,7 @@ const Admin = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,231</div>
-              <p className="text-xs text-muted-foreground">+15% from last month</p>
+              <div className="text-2xl font-bold">৳{totalRevenue.toFixed(2)}</div>
             </CardContent>
           </Card>
         </div>
@@ -96,7 +164,6 @@ const Admin = () => {
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="customers">Customers</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -114,57 +181,64 @@ const Admin = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>${product.price}</TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>
-                          <Badge variant={product.status === "Active" ? "default" : "destructive"}>
-                            {product.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleEditProduct(product)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                {productsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell>৳{product.price}</TableCell>
+                          <TableCell>{product.stock_quantity}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(product.status)}>
+                              {product.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleEditProduct(product)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product.id)}
+                                disabled={deleteProductMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="orders">
-            <OrderManagement orders={mockOrders} />
+            <AdminOrderManagement orders={orders} isLoading={ordersLoading} />
           </TabsContent>
 
           <TabsContent value="customers">
@@ -178,31 +252,19 @@ const Admin = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics & Reports</CardTitle>
-                <CardDescription>View detailed analytics and reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">Analytics dashboard coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {showProductForm && (
-          <ProductForm 
+          <AdminProductForm 
             product={editingProduct}
             onClose={() => {
               setShowProductForm(false);
               setEditingProduct(null);
             }}
-            onSave={(product) => {
-              console.log('Saving product:', product);
+            onSave={() => {
               setShowProductForm(false);
               setEditingProduct(null);
+              queryClient.invalidateQueries({ queryKey: ['admin-products'] });
             }}
           />
         )}

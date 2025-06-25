@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,11 +134,11 @@ const Checkout = () => {
           toast.error('Failed to get bKash payment URL');
         }
       } else {
-        // Cash on Delivery
+        // Cash on Delivery - use 'processing' instead of 'confirmed'
         const { error: updateError } = await supabase
           .from('orders')
           .update({
-            status: 'confirmed',
+            status: 'processing',
             payment_status: 'pending'
           })
           .eq('id', order.id);
