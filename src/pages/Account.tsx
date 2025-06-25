@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,67 +7,206 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Package, Heart, Settings, MapPin, ArrowLeft } from 'lucide-react';
+import { User, Package, Heart, Settings, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface Order {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  order_items: {
+    quantity: number;
+  }[];
+}
+
+interface WishlistItem {
+  id: string;
+  product: {
+    id: string;
+    name: string;
+    brand: string;
+    price: number;
+    images: string[];
+  };
+}
 
 const Account = () => {
+  const { user, userProfile } = useAuth();
   const [userInfo, setUserInfo] = useState({
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.johnson@email.com',
-    phone: '+880 1234 567890',
-    address: '123 Main Street, Dhaka 1000'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: ''
   });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const orders = [
-    {
-      id: 'ORD-001',
-      date: '2024-01-15',
-      status: 'Delivered',
-      total: 7700,
-      items: 3
-    },
-    {
-      id: 'ORD-002',
-      date: '2024-01-10',
-      status: 'Shipped',
-      total: 4500,
-      items: 1
-    },
-    {
-      id: 'ORD-003',
-      date: '2024-01-05',
-      status: 'Processing',
-      total: 3200,
-      items: 2
+  useEffect(() => {
+    if (userProfile) {
+      setUserInfo({
+        firstName: userProfile.first_name || '',
+        lastName: userProfile.last_name || '',
+        email: userProfile.email || '',
+        phone: userProfile.phone || '',
+        address: userProfile.address || ''
+      });
     }
-  ];
+  }, [userProfile]);
 
-  const wishlistItems = [
-    {
-      id: 1,
-      name: 'Premium Face Serum',
-      brand: 'SIA Skincare',
-      price: 2800,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 2,
-      name: 'Designer Wallet',
-      brand: 'SIA Fashion',
-      price: 4200,
-      image: '/placeholder.svg'
+  useEffect(() => {
+    if (user && userProfile) {
+      fetchOrders();
+      fetchWishlist();
     }
-  ];
+  }, [user, userProfile]);
+
+  const fetchOrders = async () => {
+    if (!userProfile) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          created_at,
+          status,
+          total_amount,
+          order_items (
+            quantity
+          )
+        `)
+        .eq('user_id', userProfile.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching orders:', error);
+        return;
+      }
+
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
+  const fetchWishlist = async () => {
+    if (!userProfile) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('wishlist_items')
+        .select(`
+          id,
+          products (
+            id,
+            name,
+            brand,
+            price,
+            images
+          )
+        `)
+        .eq('user_id', userProfile.id);
+
+      if (error) {
+        console.error('Error fetching wishlist:', error);
+        return;
+      }
+
+      const formattedWishlist = data?.map(item => ({
+        id: item.id,
+        product: {
+          id: item.products.id,
+          name: item.products.name,
+          brand: item.products.brand,
+          price: item.products.price,
+          images: item.products.images || []
+        }
+      })) || [];
+
+      setWishlistItems(formattedWishlist);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!userProfile) return;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          phone: userInfo.phone,
+          address: userInfo.address
+        })
+        .eq('id', userProfile.id);
+
+      if (error) {
+        toast.error('Failed to update profile');
+        return;
+      }
+
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
+  };
+
+  const removeFromWishlist = async (wishlistItemId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wishlist_items')
+        .delete()
+        .eq('id', wishlistItemId);
+
+      if (error) {
+        toast.error('Failed to remove item from wishlist');
+        return;
+      }
+
+      toast.success('Item removed from wishlist');
+      fetchWishlist();
+    } catch (error) {
+      toast.error('Failed to remove item from wishlist');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Delivered': return 'bg-green-100 text-green-800';
-      case 'Shipped': return 'bg-blue-100 text-blue-800';
-      case 'Processing': return 'bg-yellow-100 text-yellow-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'shipped': return 'bg-blue-100 text-blue-800';
+      case 'processing': return 'bg-yellow-100 text-yellow-800';
+      case 'pending': return 'bg-orange-100 text-orange-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getTotalItems = (order: Order) => {
+    return order.order_items.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-500">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -132,7 +271,8 @@ const Account = () => {
                     id="email"
                     type="email"
                     value={userInfo.email}
-                    onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                    disabled
+                    className="bg-gray-100"
                   />
                 </div>
                 <div>
@@ -151,7 +291,12 @@ const Account = () => {
                     onChange={(e) => setUserInfo({...userInfo, address: e.target.value})}
                   />
                 </div>
-                <Button className="bg-pink-600 hover:bg-pink-700">Save Changes</Button>
+                <Button 
+                  className="bg-pink-600 hover:bg-pink-700"
+                  onClick={handleSaveProfile}
+                >
+                  Save Changes
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -162,28 +307,42 @@ const Account = () => {
                 <CardTitle>Order History</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold">Order #{order.id}</h4>
-                          <p className="text-sm text-gray-500">Placed on {order.date}</p>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No orders found</p>
+                    <Link to="/products">
+                      <Button className="mt-4 bg-pink-600 hover:bg-pink-700">
+                        Start Shopping
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => (
+                      <div key={order.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold">Order #{order.id.slice(0, 8)}</h4>
+                            <p className="text-sm text-gray-500">
+                              Placed on {new Date(order.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </Badge>
                         </div>
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">{order.items} items</p>
-                        <div className="flex items-center space-x-4">
-                          <span className="font-semibold">৳{order.total}</span>
-                          <Button variant="outline" size="sm">View Details</Button>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-gray-600">{getTotalItems(order)} items</p>
+                          <div className="flex items-center space-x-4">
+                            <span className="font-semibold">৳{order.total_amount}</span>
+                            <Button variant="outline" size="sm">View Details</Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -194,30 +353,48 @@ const Account = () => {
                 <CardTitle>My Wishlist</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {wishlistItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-32 object-cover rounded mb-3"
-                      />
-                      <h4 className="font-semibold mb-1">{item.name}</h4>
-                      <p className="text-sm text-gray-500 mb-2">{item.brand}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-pink-600">৳{item.price}</span>
-                        <div className="flex space-x-2">
-                          <Button size="sm" className="bg-pink-600 hover:bg-pink-700">
-                            Add to Cart
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Remove
-                          </Button>
+                {wishlistItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">Your wishlist is empty</p>
+                    <Link to="/products">
+                      <Button className="mt-4 bg-pink-600 hover:bg-pink-700">
+                        Browse Products
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {wishlistItems.map((item) => (
+                      <div key={item.id} className="border rounded-lg p-4">
+                        <img
+                          src={item.product.images[0] || '/placeholder.svg'}
+                          alt={item.product.name}
+                          className="w-full h-32 object-cover rounded mb-3"
+                        />
+                        <h4 className="font-semibold mb-1">{item.product.name}</h4>
+                        <p className="text-sm text-gray-500 mb-2">{item.product.brand}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-pink-600">৳{item.product.price}</span>
+                          <div className="flex space-x-2">
+                            <Link to={`/product/${item.product.id}`}>
+                              <Button size="sm" className="bg-pink-600 hover:bg-pink-700">
+                                View Product
+                              </Button>
+                            </Link>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => removeFromWishlist(item.id)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

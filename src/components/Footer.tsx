@@ -45,13 +45,21 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info & Admin */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Get in Touch</h3>
             <div className="space-y-2 text-gray-300 text-sm">
               <p>📧 hello@siacollections.com</p>
               <p>📞 +880 1XXX-XXXXXX</p>
               <p>📍 Dhaka, Bangladesh</p>
+            </div>
+            <div className="pt-4 border-t border-gray-800">
+              <Link 
+                to="/login" 
+                className="text-gray-400 hover:text-pink-400 transition-colors text-sm"
+              >
+                Admin Login
+              </Link>
             </div>
           </div>
         </div>
