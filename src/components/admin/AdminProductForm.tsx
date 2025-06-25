@@ -24,7 +24,7 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
     category: '',
     brand: '',
     stock_quantity: '',
-    status: 'active',
+    status: 'active' as 'active' | 'inactive' | 'out_of_stock',
     images: ['']
   });
 
@@ -45,6 +45,10 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleStatusChange = (value: 'active' | 'inactive' | 'out_of_stock') => {
+    setFormData(prev => ({ ...prev, status: value }));
   };
 
   const handleImageChange = (index: number, value: string) => {
@@ -114,13 +118,13 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Product Name *</Label>
               <Input
@@ -141,7 +145,7 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="price">Price (৳) *</Label>
               <Input
@@ -165,7 +169,7 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="brand">Brand</Label>
               <Input
@@ -176,7 +180,7 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+              <Select value={formData.status} onValueChange={handleStatusChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -208,11 +212,13 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
                     placeholder="Image URL"
                     value={image}
                     onChange={(e) => handleImageChange(index, e.target.value)}
+                    className="flex-1"
                   />
                   {formData.images.length > 1 && (
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       onClick={() => removeImageField(index)}
                     >
                       Remove
@@ -226,7 +232,7 @@ export const AdminProductForm = ({ product, onClose, onSave }: AdminProductFormP
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
