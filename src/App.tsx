@@ -51,6 +51,9 @@ const App = () => (
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/checkout/failed" element={<CheckoutFailed />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/collections" element={<Products />} />
+                <Route path="/products/:category" element={<Products />} />
+                <Route path="/collections/:category" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/account" element={
                   <ProtectedRoute>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Award, Heart, Truck } from 'lucide-react';
+import { ArrowLeft, Users, Award, Heart, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,23 +10,23 @@ const About = () => {
   const values = [
     {
       icon: Heart,
-      title: 'Quality First',
-      description: 'We carefully curate each product to ensure the highest quality for our customers.'
-    },
-    {
-      icon: Users,
-      title: 'Customer Focused',
-      description: 'Your satisfaction is our priority. We listen, learn, and improve based on your feedback.'
+      title: 'Beauty for All',
+      description: 'We believe every woman deserves to feel beautiful and confident in their own skin.'
     },
     {
       icon: Award,
-      title: 'Authentic Products',
-      description: 'All our products are 100% authentic and sourced directly from trusted suppliers.'
+      title: 'Premium Quality',
+      description: 'We source only the finest products from trusted brands and suppliers worldwide.'
     },
     {
-      icon: Truck,
-      title: 'Fast Delivery',
-      description: 'Quick and reliable delivery across Bangladesh with careful packaging.'
+      icon: Users,
+      title: 'Customer First',
+      description: 'Your satisfaction is our priority. We provide exceptional service and support.'
+    },
+    {
+      icon: Globe,
+      title: 'Global Reach',
+      description: 'Bringing international beauty trends and products to Bangladesh and beyond.'
     }
   ];
 
@@ -41,37 +41,32 @@ const About = () => {
         </Link>
         
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">About SIA Collections</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Your trusted destination for premium beauty products, fashion accessories, and lifestyle essentials in Bangladesh.
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            About SIA Collections
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your premier destination for beauty, fashion, and lifestyle products in Bangladesh
           </p>
         </div>
 
         <div className="space-y-8">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Our Story</CardTitle>
-            </CardHeader>
-            <CardContent className="prose max-w-none">
+            <CardContent className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Story</h2>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Founded with a passion for bringing quality beauty and fashion products to Bangladesh, 
-                SIA Collections has grown from a small startup to a trusted name in the industry. 
-                We believe that everyone deserves access to premium products at affordable prices.
+                Founded with a passion for beauty and fashion, SIA Collections has grown to become one of Bangladesh's most trusted online retailers. We started with a simple mission: to make high-quality beauty and fashion products accessible to every woman in Bangladesh.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                Our journey began with a simple mission: to make high-quality makeup, skincare, 
-                and fashion accessories accessible to everyone. Today, we serve thousands of 
-                satisfied customers across Bangladesh, offering everything from professional 
-                makeup kits to designer handbags.
+                From premium makeup and skincare to stylish handbags and footwear, we curate only the best products that meet our strict quality standards. Our commitment to authenticity, customer service, and competitive pricing has earned us the trust of thousands of satisfied customers.
               </p>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {values.map((value, index) => (
-              <Card key={index} className="text-center">
-                <CardContent className="p-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 mb-4">
+              <Card key={index}>
+                <CardContent className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-pink-100 to-purple-100 mb-4">
                     <value.icon className="h-8 w-8 text-pink-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{value.title}</h3>
@@ -83,31 +78,44 @@ const About = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Why Choose Us?</CardTitle>
+              <CardTitle>Why Choose SIA Collections?</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-start space-x-2">
-                  <span className="text-pink-600 font-bold">•</span>
-                  <span>Wide range of authentic beauty and fashion products</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-pink-600 font-bold">•</span>
-                  <span>Competitive prices with frequent sales and discounts</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-pink-600 font-bold">•</span>
-                  <span>Fast and reliable delivery across Bangladesh</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-pink-600 font-bold">•</span>
-                  <span>Excellent customer service and support</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-pink-600 font-bold">•</span>
-                  <span>Easy returns and exchange policy</span>
-                </li>
-              </ul>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">🌟 Authentic Products</h4>
+                  <p className="text-gray-600 text-sm mb-4">All our products are 100% authentic and sourced directly from authorized distributors.</p>
+                  
+                  <h4 className="font-semibold text-gray-900 mb-2">🚚 Fast Delivery</h4>
+                  <p className="text-gray-600 text-sm mb-4">Quick and reliable delivery across Bangladesh with secure packaging.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">💝 Easy Returns</h4>
+                  <p className="text-gray-600 text-sm mb-4">Hassle-free 7-day return policy for your peace of mind.</p>
+                  
+                  <h4 className="font-semibold text-gray-900 mb-2">🎯 Expert Curation</h4>
+                  <p className="text-gray-600 text-sm">Our beauty experts carefully select every product in our collection.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-8 text-center bg-gradient-to-r from-pink-50 to-purple-50">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Get in Touch</h3>
+              <p className="text-gray-600 mb-6">
+                Have questions or need help? We'd love to hear from you!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/contact">
+                  <button className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium">
+                    Contact Us
+                  </button>
+                </Link>
+                <a href="mailto:hello@siacollections.com" className="border border-pink-600 text-pink-600 hover:bg-pink-50 px-6 py-3 rounded-lg font-medium">
+                  Email Us
+                </a>
+              </div>
             </CardContent>
           </Card>
         </div>

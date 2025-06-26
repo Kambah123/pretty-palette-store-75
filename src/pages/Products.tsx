@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,14 +11,25 @@ import { Badge } from '@/components/ui/badge';
 import { SearchWithSuggestions } from '@/components/search/SearchWithSuggestions';
 import { Filter, Star, Heart, ShoppingCart, ArrowLeft, Grid, List } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const Products = () => {
+  const { category } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Set initial category filter if coming from URL
+  useEffect(() => {
+    if (category) {
+      const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+      setSelectedCategories([formattedCategory]);
+    }
+  }, [category]);
 
   const products = [
     {
@@ -30,7 +41,7 @@ const Products = () => {
       originalPrice: 5500,
       rating: 4.8,
       reviews: 124,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
       featured: true,
       inStock: true,
       description: 'Complete professional makeup kit with premium brushes and high-quality cosmetics.'
@@ -44,7 +55,7 @@ const Products = () => {
       originalPrice: 4000,
       rating: 4.9,
       reviews: 89,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop',
       featured: false,
       inStock: true,
       description: 'Brightening vitamin C serum and moisturizer for radiant skin.'
@@ -58,7 +69,7 @@ const Products = () => {
       originalPrice: 9000,
       rating: 4.7,
       reviews: 56,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop',
       featured: true,
       inStock: true,
       description: 'Luxury leather handbag with elegant design and premium finish.'
@@ -72,15 +83,43 @@ const Products = () => {
       originalPrice: 6500,
       rating: 4.6,
       reviews: 73,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
       featured: false,
       inStock: false,
       description: 'Comfortable and stylish footwear collection for all occasions.'
+    },
+    {
+      id: 5,
+      name: 'Gold Jewelry Set',
+      brand: 'SIA Accessories',
+      category: 'Accessories',
+      price: 8900,
+      originalPrice: 11000,
+      rating: 4.9,
+      reviews: 92,
+      image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop',
+      featured: true,
+      inStock: true,
+      description: 'Elegant gold-plated jewelry set perfect for special occasions.'
+    },
+    {
+      id: 6,
+      name: 'Summer Dress Collection',
+      brand: 'SIA Fashion',
+      category: 'Clothing',
+      price: 3800,
+      originalPrice: 4500,
+      rating: 4.5,
+      reviews: 67,
+      image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop',
+      featured: false,
+      inStock: true,
+      description: 'Stylish and comfortable summer dresses for every occasion.'
     }
   ];
 
-  const brands = ['SIA Beauty', 'SIA Skincare', 'SIA Fashion', 'SIA Shoes'];
-  const categories = ['Makeup', 'Skincare', 'Handbags', 'Shoes', 'Accessories'];
+  const brands = ['SIA Beauty', 'SIA Skincare', 'SIA Fashion', 'SIA Shoes', 'SIA Accessories'];
+  const categories = ['Makeup', 'Skincare', 'Handbags', 'Shoes', 'Accessories', 'Clothing'];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -164,21 +203,21 @@ const Products = () => {
       <div>
         <h3 className="font-semibold mb-3">Categories</h3>
         <div className="space-y-2 max-h-40 overflow-y-auto">
-          {categories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
+          {categories.map((cat) => (
+            <div key={cat} className="flex items-center space-x-2">
               <Checkbox
-                id={category}
-                checked={selectedCategories.includes(category)}
+                id={cat}
+                checked={selectedCategories.includes(cat)}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedCategories([...selectedCategories, category]);
+                    setSelectedCategories([...selectedCategories, cat]);
                   } else {
-                    setSelectedCategories(selectedCategories.filter(c => c !== category));
+                    setSelectedCategories(selectedCategories.filter(c => c !== cat));
                   }
                 }}
               />
-              <Label htmlFor={category} className="text-sm cursor-pointer">
-                {category}
+              <Label htmlFor={cat} className="text-sm cursor-pointer">
+                {cat}
               </Label>
             </div>
           ))}
@@ -355,128 +394,125 @@ const Products = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="container mx-auto px-4">
-        <Link to="/" className="inline-flex items-center text-pink-600 hover:text-pink-700 mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Link>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="py-4 sm:py-8">
+        <div className="container mx-auto px-4">
+          <Link to="/" className="inline-flex items-center text-pink-600 hover:text-pink-700 mb-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
 
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">All Products</h1>
-          
-          {/* Search and Controls */}
-          <div className="flex flex-col gap-4">
-            <SearchWithSuggestions 
-              onSearch={setSearchTerm}
-              className="max-w-md"
-            />
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} Products` : 'All Products'}
+            </h1>
             
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="rating">Highest Rated</SelectItem>
-                    <SelectItem value="popularity">Most Popular</SelectItem>
-                    <SelectItem value="name">Name A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="sm:hidden">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filters
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-80">
-                    <SheetHeader>
-                      <SheetTitle>Filters</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-6">
-                      <FilterContent />
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
+            <div className="flex flex-col gap-4">
+              <SearchWithSuggestions 
+                onSearch={setSearchTerm}
+                className="max-w-md"
+              />
+              
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="rating">Highest Rated</SelectItem>
+                      <SelectItem value="popularity">Most Popular</SelectItem>
+                      <SelectItem value="name">Name A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="sm:hidden">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filters
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-80">
+                      <SheetHeader>
+                        <SheetTitle>Filters</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <FilterContent />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex gap-6 sm:gap-8">
-          {/* Desktop Filters */}
-          <div className="hidden sm:block w-64 shrink-0">
-            <Card className="sticky top-4">
-              <CardContent className="p-6">
-                <h2 className="font-semibold mb-4">Filters</h2>
-                <FilterContent />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Products */}
-          <div className="flex-1">
-            <div className="mb-4 text-sm text-gray-600">
-              Showing {sortedProducts.length} of {products.length} products
+          <div className="flex gap-6 sm:gap-8">
+            <div className="hidden sm:block w-64 shrink-0">
+              <Card className="sticky top-4">
+                <CardContent className="p-6">
+                  <h2 className="font-semibold mb-4">Filters</h2>
+                  <FilterContent />
+                </CardContent>
+              </Card>
             </div>
-            
-            {viewMode === 'grid' ? (
+
+            <div className="flex-1">
+              <div className="mb-4 text-sm text-gray-600">
+                Showing {sortedProducts.length} of {products.length} products
+              </div>
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {sortedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            ) : (
-              <div className="space-y-4">
-                {sortedProducts.map((product) => (
-                  <ProductListItem key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-            
-            {sortedProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedBrands([]);
-                    setSelectedCategories([]);
-                    setPriceRange([0, 10000]);
-                  }}
-                >
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
+              
+              {sortedProducts.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedBrands([]);
+                      setSelectedCategories([]);
+                      setPriceRange([0, 10000]);
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };
