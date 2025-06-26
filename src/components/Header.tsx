@@ -44,9 +44,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              SIA Collections
-            </h1>
+            <img 
+              src="/lovable-uploads/0301ff21-6fb9-4809-bfbb-e5cc54cf2e20.png" 
+              alt="SIA Collections Logo" 
+              className="h-12 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

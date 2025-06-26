@@ -9,18 +9,14 @@ const HeroSection = () => {
     <section className="relative py-16 md:py-24 overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(/lovable-uploads/62fafed4-496a-4927-9623-7f9e1b36fb69.png)'
+          backgroundImage: 'url(/lovable-uploads/3328c8a9-0f6b-41e3-ae55-c9344f828827.png)'
         }}
       ></div>
       
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-white"></div>
-      
-      {/* Background Decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full blur-3xl opacity-30 -translate-y-32 translate-x-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-200 to-pink-200 rounded-full blur-3xl opacity-30 translate-y-24 -translate-x-24"></div>
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-white/80"></div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">

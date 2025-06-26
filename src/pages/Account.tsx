@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,7 +37,7 @@ const Account = () => {
     address: ''
   });
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   console.log('Account - user:', user);
@@ -58,20 +57,18 @@ const Account = () => {
   }, [userProfile]);
 
   useEffect(() => {
-    if (user && userProfile && !authLoading) {
+    if (user && userProfile) {
       fetchOrders();
     }
-  }, [user, userProfile, authLoading]);
+  }, [user, userProfile]);
 
   const fetchOrders = async () => {
     if (!userProfile) {
-      console.log('No user profile, skipping order fetch');
-      setLoading(false);
       return;
     }
 
+    setOrdersLoading(true);
     try {
-      console.log('Fetching orders for user:', userProfile.id);
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -95,13 +92,12 @@ const Account = () => {
         return;
       }
 
-      console.log('Orders fetched:', data);
       setOrders(data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Failed to load orders');
     } finally {
-      setLoading(false);
+      setOrdersLoading(false);
     }
   };
 
@@ -153,19 +149,21 @@ const Account = () => {
     return order.order_items.reduce((sum, item) => sum + item.quantity, 0);
   };
 
-  if (authLoading || loading) {
+  // Show loading only while auth is loading
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
-            <span className="ml-2 text-gray-500">Loading your account...</span>
+            <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         </div>
       </div>
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user || !userProfile) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -285,7 +283,12 @@ const Account = () => {
                 <CardTitle>Order History</CardTitle>
               </CardHeader>
               <CardContent>
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">No orders found</p>
