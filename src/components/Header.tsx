@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Heart, Menu, X, Search, LogOut } from 'lucide-react';
@@ -11,13 +12,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, userProfile, signOut, isAdmin } = useAuth();
   const { cartItemCount } = useCart();
-  const { wishlistItemCount } = useWishlist();
+  const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -71,9 +73,9 @@ const Header = () => {
             <Link to="/account?tab=wishlist">
               <Button variant="ghost" size="icon" className="relative">
                 <Heart className="h-5 w-5" />
-                {wishlistItemCount > 0 && (
+                {wishlistCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-pink-600">
-                    {wishlistItemCount}
+                    {wishlistCount}
                   </Badge>
                 )}
               </Button>

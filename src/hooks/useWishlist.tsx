@@ -7,15 +7,23 @@ import { toast } from 'sonner';
 interface WishlistItem {
   id: string;
   product_id: string;
+  user_id: string;
+  created_at: string;
+  products: {
+    id: string;
+    name: string;
+    price: number;
+    images: string[];
+  };
 }
 
 interface WishlistContextType {
   wishlistItems: WishlistItem[];
-  loading: boolean;
+  wishlistCount: number;
   addToWishlist: (productId: string) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
-  refreshWishlist: () => Promise<void>;
+  loading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -23,10 +31,10 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user, userProfile } = useAuth();
+  const { user } = useAuth();
 
-  const fetchWishlistItems = async () => {
-    if (!user || !userProfile) {
+  const fetchWishlist = async () => {
+    if (!user) {
       setWishlistItems([]);
       return;
     }
@@ -35,30 +43,33 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('wishlist_items')
-        .select('id, product_id')
-        .eq('user_id', userProfile.id);
+        .select(`
+          *,
+          products (
+            id,
+            name,
+            price,
+            images
+          )
+        `)
+        .eq('user_id', user.id);
 
-      if (error) {
-        console.error('Error fetching wishlist items:', error);
-        return;
-      }
-
+      if (error) throw error;
       setWishlistItems(data || []);
     } catch (error) {
-      console.error('Error fetching wishlist items:', error);
+      console.error('Error fetching wishlist:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const addToWishlist = async (productId: string) => {
-    if (!user || !userProfile) {
-      toast.error('Please log in to add items to wishlist');
-      return;
-    }
+  useEffect(() => {
+    fetchWishlist();
+  }, [user]);
 
-    if (isInWishlist(productId)) {
-      toast.info('Item is already in your wishlist');
+  const addToWishlist = async (productId: string) => {
+    if (!user) {
+      toast.error('Please login to add items to wishlist');
       return;
     }
 
@@ -66,45 +77,37 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase
         .from('wishlist_items')
         .insert({
-          user_id: userProfile.id,
+          user_id: user.id,
           product_id: productId
         });
 
-      if (error) {
-        console.error('Error adding to wishlist:', error);
-        toast.error('Failed to add item to wishlist');
-        return;
-      }
-
-      toast.success('Item added to wishlist');
-      await fetchWishlistItems();
+      if (error) throw error;
+      
+      toast.success('Added to wishlist');
+      fetchWishlist();
     } catch (error) {
       console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add item to wishlist');
+      toast.error('Failed to add to wishlist');
     }
   };
 
   const removeFromWishlist = async (productId: string) => {
-    if (!user || !userProfile) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('wishlist_items')
         .delete()
-        .eq('user_id', userProfile.id)
+        .eq('user_id', user.id)
         .eq('product_id', productId);
 
-      if (error) {
-        console.error('Error removing from wishlist:', error);
-        toast.error('Failed to remove item from wishlist');
-        return;
-      }
-
-      toast.success('Item removed from wishlist');
-      await fetchWishlistItems();
+      if (error) throw error;
+      
+      toast.success('Removed from wishlist');
+      fetchWishlist();
     } catch (error) {
       console.error('Error removing from wishlist:', error);
-      toast.error('Failed to remove item from wishlist');
+      toast.error('Failed to remove from wishlist');
     }
   };
 
@@ -112,25 +115,13 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     return wishlistItems.some(item => item.product_id === productId);
   };
 
-  const refreshWishlist = async () => {
-    await fetchWishlistItems();
-  };
-
-  useEffect(() => {
-    if (user && userProfile) {
-      fetchWishlistItems();
-    } else {
-      setWishlistItems([]);
-    }
-  }, [user, userProfile]);
-
   const value = {
     wishlistItems,
-    loading,
+    wishlistCount: wishlistItems.length,
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
-    refreshWishlist,
+    loading,
   };
 
   return (

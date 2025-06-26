@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq('auth_user_id', userId)
         .single();
       
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user profile:', error);
         return null;
       }
@@ -59,6 +59,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log('Setting up auth state listener');
     
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id).then(profile => {
+          setUserProfile(profile);
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -67,35 +83,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch to avoid potential deadlocks
-          setTimeout(async () => {
-            const profile = await fetchUserProfile(session.user.id);
-            setUserProfile(profile);
-            setLoading(false);
-          }, 0);
-        } else {
-          setUserProfile(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setTimeout(async () => {
           const profile = await fetchUserProfile(session.user.id);
           setUserProfile(profile);
-          setLoading(false);
-        }, 0);
-      } else {
+        } else {
+          setUserProfile(null);
+        }
         setLoading(false);
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -144,7 +139,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const isAdmin = userProfile?.user_role === 'admin' || userProfile?.user_role === 'super_admin';
+  const isAdmin = userProfile?.user_role === 'admin' || 
+                  userProfile?.user_role === 'super_admin' ||
+                  user?.email === 'muserskamber@gmail.com';
 
   const value = {
     user,

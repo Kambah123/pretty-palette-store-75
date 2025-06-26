@@ -2,10 +2,22 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Star, Users, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-white py-16 md:py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+        style={{
+          backgroundImage: 'url(/lovable-uploads/62fafed4-496a-4927-9623-7f9e1b36fb69.png)'
+        }}
+      ></div>
+      
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-white"></div>
+      
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full blur-3xl opacity-30 -translate-y-32 translate-x-32"></div>
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-200 to-pink-200 rounded-full blur-3xl opacity-30 translate-y-24 -translate-x-24"></div>
@@ -28,19 +40,23 @@ const HeroSection = () => {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
-            >
-              Shop Now
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 px-8 py-4 text-lg font-semibold rounded-full hover-lift transition-all duration-200"
-            >
-              View Collections
-            </Button>
+            <Link to="/products">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
+              >
+                Shop Now
+              </Button>
+            </Link>
+            <Link to="/products">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 px-8 py-4 text-lg font-semibold rounded-full hover-lift transition-all duration-200"
+              >
+                View Collections
+              </Button>
+            </Link>
           </div>
           
           {/* Key Metrics */}
