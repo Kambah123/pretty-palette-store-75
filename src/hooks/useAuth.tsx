@@ -16,6 +16,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   isAdmin: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -39,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
+      console.log('User profile fetched:', data);
       return data;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -46,10 +49,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    if (user) {
+      const profile = await fetchUserProfile(user.id);
+      setUserProfile(profile);
+    }
+  };
+
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -69,6 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -142,6 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOut,
     resetPassword,
     isAdmin,
+    refreshProfile,
   };
 
   return (

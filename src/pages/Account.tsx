@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { User, Package, Heart, Settings, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useWishlist } from '@/hooks/useWishlist';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -20,22 +21,15 @@ interface Order {
   total_amount: number;
   order_items: {
     quantity: number;
+    products: {
+      name: string;
+    };
   }[];
 }
 
-interface WishlistItem {
-  id: string;
-  product: {
-    id: string;
-    name: string;
-    brand: string;
-    price: number;
-    images: string[];
-  };
-}
-
 const Account = () => {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
+  const { wishlistItems, loading: wishlistLoading, removeFromWishlist } = useWishlist();
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -44,8 +38,12 @@ const Account = () => {
     address: ''
   });
   const [orders, setOrders] = useState<Order[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  console.log('Account - user:', user);
+  console.log('Account - userProfile:', userProfile);
+  console.log('Account - authLoading:', authLoading);
 
   useEffect(() => {
     if (userProfile) {
@@ -60,16 +58,20 @@ const Account = () => {
   }, [userProfile]);
 
   useEffect(() => {
-    if (user && userProfile) {
+    if (user && userProfile && !authLoading) {
       fetchOrders();
-      fetchWishlist();
     }
-  }, [user, userProfile]);
+  }, [user, userProfile, authLoading]);
 
   const fetchOrders = async () => {
-    if (!userProfile) return;
+    if (!userProfile) {
+      console.log('No user profile, skipping order fetch');
+      setLoading(false);
+      return;
+    }
 
     try {
+      console.log('Fetching orders for user:', userProfile.id);
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -78,7 +80,10 @@ const Account = () => {
           status,
           total_amount,
           order_items (
-            quantity
+            quantity,
+            products (
+              name
+            )
           )
         `)
         .eq('user_id', userProfile.id)
@@ -86,60 +91,27 @@ const Account = () => {
 
       if (error) {
         console.error('Error fetching orders:', error);
+        toast.error('Failed to load orders');
         return;
       }
 
+      console.log('Orders fetched:', data);
       setOrders(data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
-    }
-  };
-
-  const fetchWishlist = async () => {
-    if (!userProfile) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('wishlist_items')
-        .select(`
-          id,
-          products (
-            id,
-            name,
-            brand,
-            price,
-            images
-          )
-        `)
-        .eq('user_id', userProfile.id);
-
-      if (error) {
-        console.error('Error fetching wishlist:', error);
-        return;
-      }
-
-      const formattedWishlist = data?.map(item => ({
-        id: item.id,
-        product: {
-          id: item.products.id,
-          name: item.products.name,
-          brand: item.products.brand,
-          price: item.products.price,
-          images: item.products.images || []
-        }
-      })) || [];
-
-      setWishlistItems(formattedWishlist);
-    } catch (error) {
-      console.error('Error fetching wishlist:', error);
+      toast.error('Failed to load orders');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSaveProfile = async () => {
-    if (!userProfile) return;
+    if (!userProfile) {
+      toast.error('No user profile found');
+      return;
+    }
 
+    setSaving(true);
     try {
       const { error } = await supabase
         .from('users')
@@ -152,32 +124,17 @@ const Account = () => {
         .eq('id', userProfile.id);
 
       if (error) {
+        console.error('Error updating profile:', error);
         toast.error('Failed to update profile');
         return;
       }
 
       toast.success('Profile updated successfully');
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
-    }
-  };
-
-  const removeFromWishlist = async (wishlistItemId: string) => {
-    try {
-      const { error } = await supabase
-        .from('wishlist_items')
-        .delete()
-        .eq('id', wishlistItemId);
-
-      if (error) {
-        toast.error('Failed to remove item from wishlist');
-        return;
-      }
-
-      toast.success('Item removed from wishlist');
-      fetchWishlist();
-    } catch (error) {
-      toast.error('Failed to remove item from wishlist');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -196,12 +153,32 @@ const Account = () => {
     return order.order_items.reduce((sum, item) => sum + item.quantity, 0);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Loading...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+            <span className="ml-2 text-gray-500">Loading your account...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !userProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-gray-500 mb-4">Please log in to access your account</p>
+              <Link to="/login">
+                <Button className="bg-pink-600 hover:bg-pink-700">
+                  Go to Login
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -294,8 +271,9 @@ const Account = () => {
                 <Button 
                   className="bg-pink-600 hover:bg-pink-700"
                   onClick={handleSaveProfile}
+                  disabled={saving}
                 >
-                  Save Changes
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </CardContent>
             </Card>
@@ -335,7 +313,7 @@ const Account = () => {
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-gray-600">{getTotalItems(order)} items</p>
                           <div className="flex items-center space-x-4">
-                            <span className="font-semibold">৳{order.total_amount}</span>
+                            <span className="font-semibold">৳{Number(order.total_amount).toFixed(2)}</span>
                             <Button variant="outline" size="sm">View Details</Button>
                           </div>
                         </div>
@@ -353,7 +331,12 @@ const Account = () => {
                 <CardTitle>My Wishlist</CardTitle>
               </CardHeader>
               <CardContent>
-                {wishlistItems.length === 0 ? (
+                {wishlistLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading wishlist...</p>
+                  </div>
+                ) : wishlistItems.length === 0 ? (
                   <div className="text-center py-8">
                     <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">Your wishlist is empty</p>
@@ -367,17 +350,13 @@ const Account = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {wishlistItems.map((item) => (
                       <div key={item.id} className="border rounded-lg p-4">
-                        <img
-                          src={item.product.images[0] || '/placeholder.svg'}
-                          alt={item.product.name}
-                          className="w-full h-32 object-cover rounded mb-3"
-                        />
-                        <h4 className="font-semibold mb-1">{item.product.name}</h4>
-                        <p className="text-sm text-gray-500 mb-2">{item.product.brand}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-pink-600">৳{item.product.price}</span>
+                        <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                          <span className="text-gray-500">No Image</span>
+                        </div>
+                        <h4 className="font-semibold mb-1">Product #{item.product_id.slice(0, 8)}</h4>
+                        <div className="flex items-center justify-between mt-4">
                           <div className="flex space-x-2">
-                            <Link to={`/product/${item.product.id}`}>
+                            <Link to={`/product/${item.product_id}`}>
                               <Button size="sm" className="bg-pink-600 hover:bg-pink-700">
                                 View Product
                               </Button>
@@ -385,7 +364,7 @@ const Account = () => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => removeFromWishlist(item.id)}
+                              onClick={() => removeFromWishlist(item.product_id)}
                             >
                               Remove
                             </Button>
