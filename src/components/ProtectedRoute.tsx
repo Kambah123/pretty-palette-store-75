@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { user, userProfile, loading } = useAuth();
 
-  console log('ProtectedRoute - user:', user);
+  console.log('ProtectedRoute - user:', user);
   console.log('ProtectedRoute - userProfile:', userProfile);
   console.log('ProtectedRoute - loading:', loading);
   console.log('ProtectedRoute - requireAdmin:', requireAdmin);
