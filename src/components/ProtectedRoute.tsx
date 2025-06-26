@@ -9,12 +9,13 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, isAdmin } = useAuth();
 
   console.log('ProtectedRoute - user:', user);
   console.log('ProtectedRoute - userProfile:', userProfile);
   console.log('ProtectedRoute - loading:', loading);
   console.log('ProtectedRoute - requireAdmin:', requireAdmin);
+  console.log('ProtectedRoute - isAdmin:', isAdmin);
 
   if (loading) {
     return (
@@ -29,17 +30,9 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to="/login" replace />;
   }
 
-  if (requireAdmin) {
-    console.log('Admin required, checking user role:', userProfile?.user_role);
-    // Allow access if user_role is admin or super_admin, OR if email is the admin email
-    const isAdminUser = userProfile?.user_role === 'admin' || 
-                       userProfile?.user_role === 'super_admin' ||
-                       user.email === 'muserskamber@gmail.com';
-    
-    if (!isAdminUser) {
-      console.log('User is not admin, redirecting to home');
-      return <Navigate to="/" replace />;
-    }
+  if (requireAdmin && !isAdmin) {
+    console.log('Admin required but user is not admin, redirecting to home');
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

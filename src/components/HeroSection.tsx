@@ -24,6 +24,15 @@ const HeroSection = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
+          {/* Logo */}
+          <div className="mb-8">
+            <img 
+              src="/lovable-uploads/0301ff21-6fb9-4809-bfbb-e5cc54cf2e20.png" 
+              alt="SIA Collections Logo" 
+              className="mx-auto h-20 w-auto mb-4"
+            />
+          </div>
+          
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
             Discover Your
