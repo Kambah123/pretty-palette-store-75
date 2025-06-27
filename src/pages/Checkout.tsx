@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, CreditCard, Truck, MapPin } from 'lucide-react';
+import { ArrowLeft, CreditCard, Truck, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,7 +26,10 @@ const Checkout = () => {
     zipCode: '',
     phone: '',
     paymentMethod: 'bkash',
-    shippingMethod: 'standard'
+    shippingMethod: 'standard',
+    location: 'dhaka', // 'dhaka' or 'outside'
+    transactionId: '',
+    paymentProof: null as File | null
   });
 
   const { cartItems, clearCart } = useCart();
@@ -32,11 +37,26 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const shipping = formData.shippingMethod === 'express' ? 300 : 150;
-  const total = subtotal + shipping;
+  
+  // Dynamic shipping calculation
+  const getShippingCost = () => {
+    return formData.location === 'dhaka' ? 100 : 200;
+  };
+
+  // COD charge calculation (1% for outside Dhaka)
+  const getCODCharge = () => {
+    if (formData.paymentMethod === 'cod' && formData.location === 'outside') {
+      return Math.round(subtotal * 0.01);
+    }
+    return 0;
+  };
+
+  const shipping = getShippingCost();
+  const codCharge = getCODCharge();
+  const total = subtotal + shipping + codCharge;
 
   const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 5) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -45,6 +65,11 @@ const Checkout = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({ ...prev, paymentProof: file }));
   };
 
   const createOrder = async () => {
@@ -104,55 +129,35 @@ const Checkout = () => {
       return;
     }
 
+    if ((formData.paymentMethod === 'bkash' || formData.paymentMethod === 'bank') && !formData.transactionId) {
+      toast.error('Please provide transaction ID');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const order = await createOrder();
       if (!order) return;
 
-      if (formData.paymentMethod === 'bkash') {
-        // Process bKash payment
-        const { data, error } = await supabase.functions.invoke('bkash-payment', {
-          body: {
-            amount: total,
-            orderId: order.id,
-            customerPhone: formData.phone,
-            customerName: `${formData.firstName} ${formData.lastName}`
-          }
-        });
+      // For manual payments, mark as processing and awaiting confirmation
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'processing',
+          payment_status: 'pending'
+        })
+        .eq('id', order.id);
 
-        if (error) {
-          console.error('bKash payment error:', error);
-          toast.error('Failed to initiate bKash payment');
-          return;
-        }
-
-        // Redirect to bKash payment page
-        if (data.bkashURL) {
-          window.location.href = data.bkashURL;
-        } else {
-          toast.error('Failed to get bKash payment URL');
-        }
-      } else {
-        // Cash on Delivery - use 'processing' instead of 'confirmed'
-        const { error: updateError } = await supabase
-          .from('orders')
-          .update({
-            status: 'processing',
-            payment_status: 'pending'
-          })
-          .eq('id', order.id);
-
-        if (updateError) {
-          console.error('Order update error:', updateError);
-          toast.error('Failed to confirm order');
-          return;
-        }
-
-        await clearCart();
-        toast.success('Order placed successfully!');
-        navigate('/account?tab=orders');
+      if (updateError) {
+        console.error('Order update error:', updateError);
+        toast.error('Failed to confirm order');
+        return;
       }
+
+      await clearCart();
+      toast.success('Order placed successfully! Please confirm payment via WhatsApp or Facebook.');
+      navigate('/account?tab=orders');
     } catch (error) {
       console.error('Error placing order:', error);
       toast.error('Failed to place order');
@@ -172,14 +177,14 @@ const Checkout = () => {
           
           {/* Progress Steps */}
           <div className="flex items-center justify-center mb-8">
-            {[1, 2, 3, 4].map((stepNumber) => (
+            {[1, 2, 3, 4, 5].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                   step >= stepNumber ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-500'
                 }`}>
                   {stepNumber}
                 </div>
-                {stepNumber < 4 && (
+                {stepNumber < 5 && (
                   <div className={`w-16 h-1 ${step > stepNumber ? 'bg-pink-600' : 'bg-gray-200'}`} />
                 )}
               </div>
@@ -267,26 +272,34 @@ const Checkout = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Truck className="h-5 w-5 mr-2" />
-                    Shipping Method
+                    Shipping Options
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <RadioGroup value={formData.shippingMethod} onValueChange={(value) => handleInputChange('shippingMethod', value)}>
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                      <RadioGroupItem value="standard" id="standard" />
-                      <Label htmlFor="standard" className="flex-1">
-                        <div>Standard Delivery (5-7 days)</div>
-                        <div className="text-sm text-gray-500">৳150</div>
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                      <RadioGroupItem value="express" id="express" />
-                      <Label htmlFor="express" className="flex-1">
-                        <div>Express Delivery (2-3 days)</div>
-                        <div className="text-sm text-gray-500">৳300</div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Delivery Location</Label>
+                    <Select value={formData.location} onValueChange={(value) => handleInputChange('location', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select delivery location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dhaka">Inside Dhaka</SelectItem>
+                        <SelectItem value="outside">Outside Dhaka</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold mb-2">Shipping Cost</h4>
+                    <p className="text-sm text-gray-600">
+                      {formData.location === 'dhaka' ? 'Inside Dhaka: ৳100' : 'Outside Dhaka: ৳200'}
+                    </p>
+                    {formData.paymentMethod === 'cod' && formData.location === 'outside' && (
+                      <p className="text-sm text-orange-600 mt-1">
+                        COD Charge (1%): ৳{getCODCharge()}
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -304,15 +317,27 @@ const Checkout = () => {
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
                       <RadioGroupItem value="bkash" id="bkash" />
                       <Label htmlFor="bkash" className="flex-1">
-                        <div>bKash Payment</div>
-                        <div className="text-sm text-gray-500">Pay securely with bKash</div>
+                        <div>bKash (Manual Payment)</div>
+                        <div className="text-sm text-gray-500">Send to +880 1671-018279</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                      <RadioGroupItem value="bank" id="bank" />
+                      <Label htmlFor="bank" className="flex-1">
+                        <div>Bank Transfer</div>
+                        <div className="text-sm text-gray-500">BRAC Bank - Account: 2060210520001</div>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
                       <RadioGroupItem value="cod" id="cod" />
                       <Label htmlFor="cod" className="flex-1">
                         <div>Cash on Delivery</div>
-                        <div className="text-sm text-gray-500">Pay when you receive your order</div>
+                        <div className="text-sm text-gray-500">
+                          Pay when you receive your order
+                          {formData.location === 'outside' && (
+                            <span className="text-orange-600"> (1% COD charge applies)</span>
+                          )}
+                        </div>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -320,7 +345,98 @@ const Checkout = () => {
               </Card>
             )}
 
-            {step === 4 && (
+            {step === 4 && (formData.paymentMethod === 'bkash' || formData.paymentMethod === 'bank') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Instructions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="payment-info bg-gradient-to-r from-pink-50 to-purple-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-800">Payment Instructions</h3>
+                    
+                    {formData.paymentMethod === 'bkash' && (
+                      <div className="mb-4">
+                        <p className="mb-2">
+                          <strong className="text-pink-600">bKash (Manual Payment):</strong>
+                        </p>
+                        <p className="text-sm text-gray-700 mb-2">
+                          Send payment to: <span className="highlight bg-yellow-200 px-2 py-1 rounded font-semibold">+880 1671-018279</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Confirm via WhatsApp or Facebook after sending.
+                        </p>
+                      </div>
+                    )}
+
+                    {formData.paymentMethod === 'bank' && (
+                      <div className="mb-4">
+                        <p className="mb-2">
+                          <strong className="text-purple-600">Bank Transfer (Credit/Debit Card):</strong>
+                        </p>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          <p>Bank: <span className="font-semibold">BRAC Bank</span></p>
+                          <p>Account Name: <span className="font-semibold">SIA Collections</span></p>
+                          <p>Account Number: <span className="highlight bg-yellow-200 px-2 py-1 rounded font-semibold">2060210520001</span></p>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Send proof of payment to our WhatsApp or Facebook.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="transactionId">Transaction ID / Reference Number *</Label>
+                    <Input 
+                      id="transactionId" 
+                      value={formData.transactionId}
+                      onChange={(e) => handleInputChange('transactionId', e.target.value)}
+                      placeholder="Enter your transaction ID"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="paymentProof">Payment Screenshot (Optional)</Label>
+                    <Input 
+                      id="paymentProof" 
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Upload screenshot of your payment confirmation</p>
+                  </div>
+
+                  {/* Contact Buttons */}
+                  <div className="contact-buttons mt-6">
+                    <h4 className="font-semibold mb-3 text-gray-800">Confirm Your Payment</h4>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <a 
+                        href="https://wa.me/8801727627194" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn-whatsapp flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Confirm via WhatsApp
+                      </a>
+                      <a 
+                        href="https://www.facebook.com/siacollections.sadiaislam" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn-facebook flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Message on Facebook
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {((step === 4 && formData.paymentMethod === 'cod') || step === 5) && (
               <Card>
                 <CardHeader>
                   <CardTitle>Order Review</CardTitle>
@@ -339,16 +455,44 @@ const Checkout = () => {
                     <div>
                       <h4 className="font-semibold mb-2">Payment Method</h4>
                       <p className="text-sm text-gray-600">
-                        {formData.paymentMethod === 'bkash' ? 'bKash Payment' : 'Cash on Delivery'}
+                        {formData.paymentMethod === 'bkash' && 'bKash Payment'}
+                        {formData.paymentMethod === 'bank' && 'Bank Transfer'}
+                        {formData.paymentMethod === 'cod' && 'Cash on Delivery'}
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Shipping Method</h4>
+                      <h4 className="font-semibold mb-2">Shipping</h4>
                       <p className="text-sm text-gray-600">
-                        {formData.shippingMethod === 'express' ? 'Express Delivery (2-3 days)' : 'Standard Delivery (5-7 days)'}
+                        {formData.location === 'dhaka' ? 'Inside Dhaka (৳100)' : 'Outside Dhaka (৳200)'}
                       </p>
                     </div>
                   </div>
+
+                  {formData.paymentMethod === 'cod' && (
+                    <div className="contact-buttons mt-6">
+                      <h4 className="font-semibold mb-3 text-gray-800">Need Help?</h4>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <a 
+                          href="https://wa.me/8801727627194" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="btn-whatsapp flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Chat on WhatsApp
+                        </a>
+                        <a 
+                          href="https://www.facebook.com/siacollections.sadiaislam" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="btn-facebook flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                        >
+                          <Phone className="h-4 w-4" />
+                          Message on Facebook
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -363,11 +507,11 @@ const Checkout = () => {
                 Back
               </Button>
               <Button 
-                onClick={step === 4 ? handlePlaceOrder : handleNext}
+                onClick={step >= 4 && (formData.paymentMethod === 'cod' || step === 5) ? handlePlaceOrder : handleNext}
                 className="bg-pink-600 hover:bg-pink-700"
                 disabled={loading}
               >
-                {loading ? 'Processing...' : (step === 4 ? 'Place Order' : 'Continue')}
+                {loading ? 'Processing...' : (step >= 4 && (formData.paymentMethod === 'cod' || step === 5) ? 'Place Order' : 'Continue')}
               </Button>
             </div>
           </div>
@@ -402,9 +546,15 @@ const Checkout = () => {
                     <span>৳{subtotal}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Shipping</span>
+                    <span>Shipping ({formData.location === 'dhaka' ? 'Inside Dhaka' : 'Outside Dhaka'})</span>
                     <span>৳{shipping}</span>
                   </div>
+                  {codCharge > 0 && (
+                    <div className="flex justify-between text-sm text-orange-600">
+                      <span>COD Charge (1%)</span>
+                      <span>৳{codCharge}</span>
+                    </div>
+                  )}
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
