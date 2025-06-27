@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,14 @@ import { Filter, Star, Heart, ShoppingCart, ArrowLeft, Grid, List } from 'lucide
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useProducts } from '@/hooks/useProducts';
+import { getProductImage, handleImageError } from '@/utils/imageUtils';
 
 const Products = () => {
   const { category } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -31,123 +34,18 @@ const Products = () => {
     }
   }, [category]);
 
-  const products = [
-    {
-      id: 1,
-      name: 'Professional Makeup Kit Set',
-      brand: 'SIA Beauty',
-      category: 'Makeup',
-      price: 4500,
-      originalPrice: 5500,
-      rating: 4.8,
-      reviews: 124,
-      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-      featured: true,
-      inStock: true,
-      description: 'Complete professional makeup kit with premium brushes and high-quality cosmetics.'
-    },
-    {
-      id: 2,
-      name: 'Vitamin C Skin Care Set',
-      brand: 'SIA Skincare',
-      category: 'Skincare',
-      price: 3200,
-      originalPrice: 4000,
-      rating: 4.9,
-      reviews: 89,
-      image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop',
-      featured: false,
-      inStock: true,
-      description: 'Brightening vitamin C serum and moisturizer for radiant skin.'
-    },
-    {
-      id: 3,
-      name: 'Designer Handbag Collection',
-      brand: 'SIA Fashion',
-      category: 'Handbags',
-      price: 7500,
-      originalPrice: 9000,
-      rating: 4.7,
-      reviews: 56,
-      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop',
-      featured: true,
-      inStock: true,
-      description: 'Luxury leather handbag with elegant design and premium finish.'
-    },
-    {
-      id: 4,
-      name: 'Premium Footwear Set',
-      brand: 'SIA Shoes',
-      category: 'Shoes',
-      price: 5200,
-      originalPrice: 6500,
-      rating: 4.6,
-      reviews: 73,
-      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
-      featured: false,
-      inStock: false,
-      description: 'Comfortable and stylish footwear collection for all occasions.'
-    },
-    {
-      id: 5,
-      name: 'Gold Jewelry Set',
-      brand: 'SIA Accessories',
-      category: 'Accessories',
-      price: 8900,
-      originalPrice: 11000,
-      rating: 4.9,
-      reviews: 92,
-      image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop',
-      featured: true,
-      inStock: true,
-      description: 'Elegant gold-plated jewelry set perfect for special occasions.'
-    },
-    {
-      id: 6,
-      name: 'Summer Dress Collection',
-      brand: 'SIA Fashion',
-      category: 'Clothing',
-      price: 3800,
-      originalPrice: 4500,
-      rating: 4.5,
-      reviews: 67,
-      image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop',
-      featured: false,
-      inStock: true,
-      description: 'Stylish and comfortable summer dresses for every occasion.'
-    }
-  ];
-
-  const brands = ['SIA Beauty', 'SIA Skincare', 'SIA Fashion', 'SIA Shoes', 'SIA Accessories'];
-  const categories = ['Makeup', 'Skincare', 'Handbags', 'Shoes', 'Accessories', 'Clothing'];
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    
-    return matchesSearch && matchesPrice && matchesBrand && matchesCategory;
+  const { data: products = [], isLoading } = useProducts({
+    category: category,
+    searchTerm: searchTerm,
+    sortBy: sortBy,
+    priceRange: priceRange,
+    brands: selectedBrands,
+    categories: selectedCategories
   });
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'popularity':
-        return b.reviews - a.reviews;
-      case 'name':
-        return a.name.localeCompare(b.name);
-      default: // newest
-        return b.id - a.id;
-    }
-  });
+  // Get unique brands and categories from products
+  const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
+  const categories = Array.from(new Set(products.map(p => p.category)));
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -176,71 +74,75 @@ const Products = () => {
         </div>
       </div>
 
-      <div>
-        <h3 className="font-semibold mb-3">Brands</h3>
-        <div className="space-y-2 max-h-40 overflow-y-auto">
-          {brands.map((brand) => (
-            <div key={brand} className="flex items-center space-x-2">
-              <Checkbox
-                id={brand}
-                checked={selectedBrands.includes(brand)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedBrands([...selectedBrands, brand]);
-                  } else {
-                    setSelectedBrands(selectedBrands.filter(b => b !== brand));
-                  }
-                }}
-              />
-              <Label htmlFor={brand} className="text-sm cursor-pointer">
-                {brand}
-              </Label>
-            </div>
-          ))}
+      {brands.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-3">Brands</h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {brands.map((brand) => (
+              <div key={brand} className="flex items-center space-x-2">
+                <Checkbox
+                  id={brand}
+                  checked={selectedBrands.includes(brand)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedBrands([...selectedBrands, brand]);
+                    } else {
+                      setSelectedBrands(selectedBrands.filter(b => b !== brand));
+                    }
+                  }}
+                />
+                <Label htmlFor={brand} className="text-sm cursor-pointer">
+                  {brand}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div>
-        <h3 className="font-semibold mb-3">Categories</h3>
-        <div className="space-y-2 max-h-40 overflow-y-auto">
-          {categories.map((cat) => (
-            <div key={cat} className="flex items-center space-x-2">
-              <Checkbox
-                id={cat}
-                checked={selectedCategories.includes(cat)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedCategories([...selectedCategories, cat]);
-                  } else {
-                    setSelectedCategories(selectedCategories.filter(c => c !== cat));
-                  }
-                }}
-              />
-              <Label htmlFor={cat} className="text-sm cursor-pointer">
-                {cat}
-              </Label>
-            </div>
-          ))}
+      {categories.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-3">Categories</h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {categories.map((cat) => (
+              <div key={cat} className="flex items-center space-x-2">
+                <Checkbox
+                  id={cat}
+                  checked={selectedCategories.includes(cat)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedCategories([...selectedCategories, cat]);
+                    } else {
+                      setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                    }
+                  }}
+                />
+                <Label htmlFor={cat} className="text-sm cursor-pointer">
+                  {cat}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
-  const ProductCard = ({ product }: { product: typeof products[0] }) => (
+  const ProductCard = ({ product }: { product: any }) => (
     <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer">
       <CardContent className="p-0">
         <div className="relative">
           <img
-            src={product.image}
+            src={getProductImage(product.images)}
             alt={product.name}
             className="w-full h-48 object-cover rounded-t-lg"
+            loading="lazy"
+            onError={handleImageError}
           />
-          {product.featured && (
-            <Badge className="absolute top-2 left-2 bg-pink-600">
-              Featured
-            </Badge>
-          )}
-          {!product.inStock && (
+          <Badge className="absolute top-2 left-2 bg-pink-600">
+            {product.category}
+          </Badge>
+          {product.stock_quantity === 0 && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-t-lg">
               <span className="text-white font-semibold">Out of Stock</span>
             </div>
@@ -255,7 +157,7 @@ const Products = () => {
         </div>
         
         <div className="p-4">
-          <p className="text-sm text-gray-500 mb-1">{product.brand}</p>
+          <p className="text-sm text-gray-500 mb-1">{product.brand || 'SIA Collections'}</p>
           <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
             {product.name}
           </h3>
@@ -266,39 +168,27 @@ const Products = () => {
                 <Star
                   key={i}
                   className={`h-3 w-3 ${
-                    i < Math.floor(product.rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
+                    i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
                   }`}
                 />
               ))}
             </div>
             <span className="text-xs text-gray-500">
-              {product.rating} ({product.reviews})
+              4.5 (25)
             </span>
           </div>
           
           <div className="flex items-center justify-between mb-3">
             <div>
               <span className="font-semibold text-pink-600">৳{product.price}</span>
-              {product.originalPrice > product.price && (
-                <span className="text-sm text-gray-400 line-through ml-2">
-                  ৳{product.originalPrice}
-                </span>
-              )}
             </div>
-            {product.originalPrice > product.price && (
-              <Badge variant="destructive" className="text-xs">
-                {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-              </Badge>
-            )}
           </div>
           
           <div className="flex space-x-2">
             <Button 
               size="sm" 
               className="flex-1 bg-pink-600 hover:bg-pink-700"
-              disabled={!product.inStock}
+              disabled={product.stock_quantity === 0}
             >
               <ShoppingCart className="h-4 w-4 mr-1" />
               Add to Cart
@@ -314,84 +204,33 @@ const Products = () => {
     </Card>
   );
 
-  const ProductListItem = ({ product }: { product: typeof products[0] }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex space-x-4">
-          <div className="relative flex-shrink-0">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-24 h-24 object-cover rounded"
-            />
-            {!product.inStock && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded">
-                <span className="text-white text-xs font-semibold">Out of Stock</span>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-500">{product.brand}</p>
-                <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
-                <div className="flex items-center space-x-1 mb-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3 w-3 ${
-                          i < Math.floor(product.rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {product.rating} ({product.reviews} reviews)
-                  </span>
-                </div>
-              </div>
-              
-              <div className="text-right ml-4">
-                <div className="mb-2">
-                  <span className="font-semibold text-pink-600 text-lg">৳{product.price}</span>
-                  {product.originalPrice > product.price && (
-                    <div>
-                      <span className="text-sm text-gray-400 line-through">
-                        ৳{product.originalPrice}
-                      </span>
-                      <Badge variant="destructive" className="text-xs ml-2">
-                        {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                      </Badge>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="py-4 sm:py-8">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {Array.from({ length: 9 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardContent className="p-0">
+                    <div className="bg-gray-300 h-48 rounded-t-lg"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="bg-gray-300 h-4 rounded w-3/4"></div>
+                      <div className="bg-gray-300 h-6 rounded w-full"></div>
+                      <div className="bg-gray-300 h-4 rounded w-1/2"></div>
+                      <div className="bg-gray-300 h-8 rounded w-full"></div>
                     </div>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    size="sm" 
-                    className="bg-pink-600 hover:bg-pink-700"
-                    disabled={!product.inStock}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-1" />
-                    Add to Cart
-                  </Button>
-                  <Link to={`/product/${product.id}`}>
-                    <Button size="sm" variant="outline">
-                      View Details
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
-  );
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -425,8 +264,6 @@ const Products = () => {
                       <SelectItem value="newest">Newest</SelectItem>
                       <SelectItem value="price-low">Price: Low to High</SelectItem>
                       <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="rating">Highest Rated</SelectItem>
-                      <SelectItem value="popularity">Most Popular</SelectItem>
                       <SelectItem value="name">Name A-Z</SelectItem>
                     </SelectContent>
                   </Select>
@@ -481,16 +318,16 @@ const Products = () => {
 
             <div className="flex-1">
               <div className="mb-4 text-sm text-gray-600">
-                Showing {sortedProducts.length} of {products.length} products
+                Showing {products.length} products
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {sortedProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
               
-              {sortedProducts.length === 0 && (
+              {products.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
                   <Button 

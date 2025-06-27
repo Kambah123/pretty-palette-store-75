@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,46 +10,7 @@ import { ProductRatingSystem } from "@/components/product/ProductRatingSystem";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { ShoppingCart, Heart, Share2, Star, ArrowLeft } from "lucide-react";
 import { Link } from 'react-router-dom';
-
-// Mock product data
-const mockProduct = {
-  id: 1,
-  name: "Premium Wireless Headphones",
-  price: 299.99,
-  originalPrice: 399.99,
-  rating: 4.5,
-  reviewCount: 1247,
-  category: "Electronics",
-  brand: "TechSound",
-  inStock: true,
-  stockCount: 15,
-  images: [
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&h=600&fit=crop"
-  ],
-  description: "Experience premium audio quality with our flagship wireless headphones. Featuring advanced noise cancellation, premium materials, and exceptional comfort for all-day listening.",
-  features: [
-    "Active Noise Cancellation",
-    "40-hour battery life",
-    "Premium leather ear cushions",
-    "Bluetooth 5.2 connectivity",
-    "Quick charge: 5 min = 3 hours playback",
-    "Multi-device pairing",
-    "Voice assistant integration"
-  ],
-  specifications: {
-    "Driver Size": "40mm",
-    "Frequency Response": "20Hz - 20kHz",
-    "Impedance": "32 ohms",
-    "Weight": "290g",
-    "Connectivity": "Bluetooth 5.2, 3.5mm jack",
-    "Battery Life": "40 hours (ANC off), 30 hours (ANC on)",
-    "Charging Time": "2.5 hours",
-    "Warranty": "2 years"
-  }
-};
+import { useProduct } from '@/hooks/useProducts';
 
 // Mock reviews data
 const mockReviews = [
@@ -100,6 +60,7 @@ const mockRatingDistribution = {
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { data: product, isLoading } = useProduct(id || '');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -113,7 +74,7 @@ const ProductDetail = () => {
     console.log('Wishlist toggled');
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number = 4.5) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
@@ -128,6 +89,58 @@ const ProductDetail = () => {
     ));
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-gray-50 py-4">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Link to="/" className="hover:text-pink-600">Home</Link>
+              <span>/</span>
+              <Link to="/products" className="hover:text-pink-600">Products</Link>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">Loading...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+            <div className="animate-pulse">
+              <div className="bg-gray-300 h-96 rounded-lg mb-4"></div>
+              <div className="flex space-x-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-gray-300 w-20 h-20 rounded-md"></div>
+                ))}
+              </div>
+            </div>
+            <div className="animate-pulse space-y-6">
+              <div className="bg-gray-300 h-8 rounded w-3/4"></div>
+              <div className="bg-gray-300 h-12 rounded w-full"></div>
+              <div className="bg-gray-300 h-4 rounded w-1/2"></div>
+              <div className="bg-gray-300 h-20 rounded w-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <Link to="/products">
+            <Button>Browse Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isInStock = product.stock_quantity && product.stock_quantity > 0;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
@@ -138,9 +151,9 @@ const ProductDetail = () => {
             <span>/</span>
             <Link to="/products" className="hover:text-pink-600">Products</Link>
             <span>/</span>
-            <span>{mockProduct.category}</span>
+            <span>{product.category}</span>
             <span>/</span>
-            <span className="text-gray-900 font-medium">{mockProduct.name}</span>
+            <span className="text-gray-900 font-medium">{product.name}</span>
           </div>
         </div>
       </div>
@@ -154,48 +167,38 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Product Images */}
           <div>
-            <ProductImageGallery images={mockProduct.images} productName={mockProduct.name} />
+            <ProductImageGallery images={product.images} productName={product.name} />
           </div>
 
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <Badge variant="secondary" className="mb-2">{mockProduct.category}</Badge>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{mockProduct.name}</h1>
-              <p className="text-gray-600 mb-4">by {mockProduct.brand}</p>
+              <Badge variant="secondary" className="mb-2">{product.category}</Badge>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <p className="text-gray-600 mb-4">by {product.brand || 'SIA Collections'}</p>
               
               {/* Rating */}
               <div className="flex items-center space-x-2 mb-4">
-                <div className="flex">{renderStars(mockProduct.rating)}</div>
+                <div className="flex">{renderStars(4.5)}</div>
                 <span className="text-sm text-gray-600">
-                  {mockProduct.rating} ({mockProduct.reviewCount} reviews)
+                  4.5 (25 reviews)
                 </span>
               </div>
 
               {/* Price */}
               <div className="flex items-center space-x-4 mb-6">
                 <span className="text-2xl lg:text-3xl font-bold text-gray-900">
-                  ${mockProduct.price}
+                  ৳{product.price}
                 </span>
-                {mockProduct.originalPrice && (
-                  <span className="text-lg lg:text-xl text-gray-500 line-through">
-                    ${mockProduct.originalPrice}
-                  </span>
-                )}
-                {mockProduct.originalPrice && (
-                  <Badge variant="destructive">
-                    Save ${(mockProduct.originalPrice - mockProduct.price).toFixed(2)}
-                  </Badge>
-                )}
               </div>
 
               {/* Stock Status */}
               <div className="mb-6">
-                {mockProduct.inStock ? (
+                {isInStock ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <span className="text-green-600 font-medium">In Stock</span>
-                    <span className="text-gray-500">({mockProduct.stockCount} available)</span>
+                    <span className="text-gray-500">({product.stock_quantity} available)</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
@@ -207,7 +210,7 @@ const ProductDetail = () => {
 
               {/* Description */}
               <p className="text-gray-700 leading-relaxed mb-6">
-                {mockProduct.description}
+                {product.description || 'Premium quality product from SIA Collections.'}
               </p>
 
               {/* Quantity and Actions */}
@@ -226,7 +229,7 @@ const ProductDetail = () => {
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
                       onClick={() => setQuantity(quantity + 1)}
-                      disabled={quantity >= mockProduct.stockCount}
+                      disabled={quantity >= (product.stock_quantity || 0)}
                     >
                       +
                     </button>
@@ -238,7 +241,7 @@ const ProductDetail = () => {
                     className="flex-1" 
                     size="lg"
                     onClick={handleAddToCart}
-                    disabled={!mockProduct.inStock}
+                    disabled={!isInStock}
                   >
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     Add to Cart
@@ -260,25 +263,20 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Details Tabs */}
-        <Tabs defaultValue="features" className="mb-12">
+        <Tabs defaultValue="description" className="mb-12">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="features">Features</TabsTrigger>
+            <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
             <TabsTrigger value="shipping">Shipping & Returns</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="features">
+          <TabsContent value="description">
             <Card>
               <CardContent className="pt-6">
-                <h3 className="text-xl font-semibold mb-4">Key Features</h3>
-                <ul className="space-y-2">
-                  {mockProduct.features.map((feature, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="text-xl font-semibold mb-4">Product Description</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.description || 'Premium quality product from SIA Collections with excellent craftsmanship and attention to detail.'}
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -286,14 +284,24 @@ const ProductDetail = () => {
           <TabsContent value="specifications">
             <Card>
               <CardContent className="pt-6">
-                <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
+                <h3 className="text-xl font-semibold mb-4">Product Specifications</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(mockProduct.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{key}:</span>
-                      <span className="text-gray-600">{value}</span>
-                    </div>
-                  ))}
+                  <div className="flex justify-between items-center py-2 border-b">
+                    <span className="font-medium">Brand:</span>
+                    <span className="text-gray-600">{product.brand || 'SIA Collections'}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b">
+                    <span className="font-medium">Category:</span>
+                    <span className="text-gray-600">{product.category}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b">
+                    <span className="font-medium">Stock:</span>
+                    <span className="text-gray-600">{product.stock_quantity} units</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b">
+                    <span className="font-medium">Status:</span>
+                    <span className="text-gray-600">{product.status}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -308,15 +316,15 @@ const ProductDetail = () => {
                     <h4 className="font-medium mb-2">Shipping Options</h4>
                     <ul className="space-y-1 text-gray-600">
                       <li>• Standard Shipping (5-7 business days): Free</li>
-                      <li>• Express Shipping (2-3 business days): $9.99</li>
-                      <li>• Next Day Delivery: $19.99</li>
+                      <li>• Express Shipping (2-3 business days): ৳99</li>
+                      <li>• Same Day Delivery (Dhaka only): ৳199</li>
                     </ul>
                   </div>
                   <Separator />
                   <div>
                     <h4 className="font-medium mb-2">Return Policy</h4>
                     <p className="text-gray-600">
-                      30-day return policy. Items must be in original condition with all packaging.
+                      7-day return policy. Items must be in original condition with all packaging.
                       Return shipping is free for defective items.
                     </p>
                   </div>
@@ -328,16 +336,16 @@ const ProductDetail = () => {
 
         {/* Enhanced Reviews Section */}
         <ProductRatingSystem 
-          productId={mockProduct.id}
-          averageRating={mockProduct.rating}
-          totalReviews={mockProduct.reviewCount}
+          productId={product.id}
+          averageRating={4.5}
+          totalReviews={25}
           reviews={mockReviews}
           ratingDistribution={mockRatingDistribution}
         />
 
         {/* Related Products */}
         <div className="mt-12">
-          <RelatedProducts currentProductId={mockProduct.id} category={mockProduct.category} />
+          <RelatedProducts currentProductId={product.id} category={product.category} />
         </div>
       </div>
     </div>

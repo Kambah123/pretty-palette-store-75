@@ -4,78 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
+import { useFeaturedProducts } from '@/hooks/useProducts';
+import { getProductImage, handleImageError } from '@/utils/imageUtils';
+import { Link } from 'react-router-dom';
 
 const FeaturedProducts = () => {
-  const featuredProducts = [
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Beauty',
-      name: 'Professional Makeup Kit Set',
-      rating: 4.8,
-      reviews: 124,
-      originalPrice: 4500,
-      discountPrice: 3200,
-      isFeatured: true
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Skincare',
-      name: 'Vitamin C Skin Care Set',
-      rating: 4.9,
-      reviews: 89,
-      originalPrice: 3500,
-      discountPrice: 2800,
-      isFeatured: false
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Fashion',
-      name: 'Designer Leather Handbag',
-      rating: 4.7,
-      reviews: 56,
-      originalPrice: 8500,
-      discountPrice: 6200,
-      isFeatured: true
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Style',
-      name: 'Premium Running Shoes',
-      rating: 4.6,
-      reviews: 203,
-      originalPrice: 5500,
-      discountPrice: 4200,
-      isFeatured: false
-    },
-    {
-      id: 5,
-      image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Beauty',
-      name: 'Luxury Lipstick Collection',
-      rating: 4.9,
-      reviews: 167,
-      originalPrice: 2800,
-      discountPrice: 2100,
-      isFeatured: true
-    },
-    {
-      id: 6,
-      image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop&auto=format',
-      brand: 'SIA Fashion',
-      name: 'Elegant Evening Dress',
-      rating: 4.8,
-      reviews: 92,
-      originalPrice: 7200,
-      discountPrice: 5400,
-      isFeatured: false
-    }
-  ];
+  const { data: featuredProducts = [], isLoading } = useFeaturedProducts(6);
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number = 4.5) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
@@ -89,6 +25,38 @@ const FeaturedProducts = () => {
       />
     ));
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Featured Products
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover our handpicked collection of premium products with unbeatable prices and quality.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card key={index} className="animate-pulse">
+                <CardContent className="p-0">
+                  <div className="bg-gray-300 h-64 rounded-t-lg"></div>
+                  <div className="p-6 space-y-3">
+                    <div className="bg-gray-300 h-4 rounded w-3/4"></div>
+                    <div className="bg-gray-300 h-6 rounded w-full"></div>
+                    <div className="bg-gray-300 h-4 rounded w-1/2"></div>
+                    <div className="bg-gray-300 h-8 rounded w-full"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
@@ -112,30 +80,31 @@ const FeaturedProducts = () => {
               <CardContent className="p-0">
                 <div className="relative">
                   <img
-                    src={product.image}
+                    src={getProductImage(product.images)}
                     alt={product.name}
                     className="w-full h-64 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    onError={handleImageError}
                   />
-                  {product.isFeatured && (
-                    <Badge className="absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white">
-                      Featured
-                    </Badge>
-                  )}
+                  <Badge className="absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white">
+                    Featured
+                  </Badge>
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="h-8 w-8 bg-white/90 hover:bg-white"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    <Link to={`/product/${product.id}`}>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-8 w-8 bg-white/90 hover:bg-white"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
 
                 <div className="p-6">
                   <div className="mb-2">
-                    <p className="text-sm text-pink-600 font-medium">{product.brand}</p>
+                    <p className="text-sm text-pink-600 font-medium">{product.brand || 'SIA Collections'}</p>
                     <h3 className="text-lg font-semibold text-gray-900 group-hover:text-pink-600 transition-colors">
                       {product.name}
                     </h3>
@@ -143,20 +112,17 @@ const FeaturedProducts = () => {
 
                   <div className="flex items-center gap-2 mb-4">
                     <div className="flex">
-                      {renderStars(product.rating)}
+                      {renderStars(4.5)}
                     </div>
                     <span className="text-sm text-gray-600">
-                      {product.rating} ({product.reviews})
+                      4.5 (25)
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold text-gray-900">
-                        ৳{product.discountPrice.toLocaleString()}
-                      </span>
-                      <span className="text-sm text-gray-500 line-through">
-                        ৳{product.originalPrice.toLocaleString()}
+                        ৳{product.price.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -176,13 +142,15 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="text-center">
-          <Button 
-            variant="outline" 
-            size="lg"
-            className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 px-8 py-4 text-lg font-semibold rounded-full hover-lift transition-all duration-200"
-          >
-            View All Products
-          </Button>
+          <Link to="/products">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 px-8 py-4 text-lg font-semibold rounded-full hover-lift transition-all duration-200"
+            >
+              View All Products
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
