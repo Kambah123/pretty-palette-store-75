@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -140,7 +141,7 @@ const ProductDetail = () => {
   }
 
   const isInStock = product.stock_quantity && product.stock_quantity > 0;
-  const maxQuantity: number = product.stock_quantity || 0;
+  const maxQuantity: number = Number(product.stock_quantity) || 0;
 
   return (
     <div className="min-h-screen bg-white">
