@@ -25,6 +25,8 @@ import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import ForgotPassword from "./pages/ForgotPassword";
+import Makeup from "./pages/Makeup";
+import Skincare from "./pages/Skincare";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,8 @@ const App = () => (
                 <Route path="/collections" element={<Products />} />
                 <Route path="/products/:category" element={<Products />} />
                 <Route path="/collections/:category" element={<Products />} />
+                <Route path="/makeup" element={<Makeup />} />
+                <Route path="/skincare" element={<Skincare />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/account" element={
                   <ProtectedRoute>

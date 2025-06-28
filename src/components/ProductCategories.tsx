@@ -15,7 +15,8 @@ const ProductCategories = () => {
       bgColor: 'bg-pink-50',
       iconColor: 'text-pink-600',
       image: '/images/category-makeup.jpg',
-      isHotSale: true
+      isHotSale: true,
+      linkTo: '/makeup'
     },
     {
       title: 'Skincare',
@@ -25,7 +26,8 @@ const ProductCategories = () => {
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
       image: '/images/category-skincare.jpg',
-      isHotSale: false
+      isHotSale: false,
+      linkTo: '/skincare'
     },
     {
       title: 'Designer Bags',
@@ -35,7 +37,8 @@ const ProductCategories = () => {
       bgColor: 'bg-gradient-to-br from-pink-50 to-purple-50',
       iconColor: 'text-pink-600',
       image: '/images/category-handbags.jpg',
-      isHotSale: false
+      isHotSale: false,
+      linkTo: '/products?category=handbags'
     },
     {
       title: 'Shoes',
@@ -45,7 +48,8 @@ const ProductCategories = () => {
       bgColor: 'bg-gradient-to-br from-purple-50 to-pink-50',
       iconColor: 'text-purple-600',
       image: '/images/category-shoes.png',
-      isHotSale: false
+      isHotSale: false,
+      linkTo: '/products?category=shoes'
     }
   ];
 
@@ -65,7 +69,7 @@ const ProductCategories = () => {
           {categories.map((category, index) => (
             <Link
               key={category.title}
-              to={`/products?category=${category.title.toLowerCase().replace(' ', '-')}`}
+              to={category.linkTo}
             >
               <Card 
                 className={`${category.bgColor} border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover-lift cursor-pointer group animate-fade-in relative overflow-hidden`}
