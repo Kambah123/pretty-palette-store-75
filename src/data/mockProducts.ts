@@ -1,4 +1,3 @@
-
 export interface MockProduct {
   id: number;
   name: string;
@@ -10,46 +9,865 @@ export interface MockProduct {
   stock_quantity: number;
   status: string;
   created_at: string;
+  sale_price?: number;
+  actual_price?: number;
 }
 
 export const generateMockProducts = (): MockProduct[] => {
-  const products: MockProduct[] = [];
-  
-  // Makeup products (1-45)
-  for (let i = 1; i <= 45; i++) {
-    const imageNumber = i.toString().padStart(4, '0');
-    products.push({
-      id: i,
-      name: `Premium Makeup Product ${i}`,
-      description: `High-quality makeup product with premium ingredients and long-lasting formula. Perfect for daily use or special occasions.`,
+  const products: MockProduct[] = [
+    // Product ID: 1-3 (Skincare instructions/serum application)
+    {
+      id: 1,
+      name: "Apply Advanced Génifique hydrating serum on clean skin, after your toner or face essence, AM and PM.",
+      description: "Advanced hydrating serum application guide for optimal skincare routine.",
+      price: 1500,
+      category: 'skincare',
+      brand: 'Lancome',
+      images: ['/images/product_0001.jpg'],
+      stock_quantity: 5,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: "The self-loading dropper gives the perfect amount of serum with each application. Simply twist open the cap to load the dropper.",
+      description: "Self-loading dropper serum dispenser for precise application.",
+      price: 1500,
+      category: 'skincare',
+      brand: 'Lancome',
+      images: ['/images/product_0002.jpg'],
+      stock_quantity: 5,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 3,
+      name: "If layering with another targeted serum, apply Advanced Génifique hydrating serum first. Follow with a moisturizer and the rest of your usual skincare routine.",
+      description: "Serum layering guide for optimal skincare routine results.",
+      price: 1500,
+      category: 'skincare',
+      brand: 'Lancome',
+      images: ['/images/product_0003.jpg'],
+      stock_quantity: 5,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    // Product ID: 4-45 (Makeup products)
+    {
+      id: 4,
+      name: 'Fenty Icon Velvet Liquid Lipstick "C-Suite Heart"',
+      description: "High-quality liquid lipstick with velvet finish and long-lasting formula.",
+      price: 3490,
+      sale_price: 3490,
+      actual_price: 5500,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0004.jpg'],
+      stock_quantity: 4,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 5,
+      name: 'Fenty Icon Velvet Liquid Lipstick "Fashion Fiend"',
+      description: "High-quality liquid lipstick with velvet finish and long-lasting formula.",
+      price: 3490,
+      sale_price: 3490,
+      actual_price: 5500,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0005.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 6,
+      name: 'Fenty Beauty Icon Velvet Liquid Lipstick "Pink Limo\'scene"',
+      description: "High-quality liquid lipstick with velvet finish and long-lasting formula.",
+      price: 3490,
+      sale_price: 3490,
+      actual_price: 5500,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0006.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 7,
+      name: 'Fenty Beauty Stunna Lip Paint Longwear Fluid Lip Color "Uncuffed"',
+      description: "Long-wearing fluid lip color with intense pigmentation.",
+      price: 3490,
+      sale_price: 3490,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0007.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 8,
+      name: 'Fenty Beauty Stunna Lip Paint Longwear Fluid Lip Color "Uncensored"',
+      description: "Long-wearing fluid lip color with intense pigmentation.",
+      price: 3490,
+      sale_price: 3490,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0008.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 9,
+      name: 'Fenty Beauty Gloss Bomb Cream Color Drip Lip Cream "Mauve Wive$"',
+      description: "Creamy lip color with glossy finish and nourishing formula.",
+      price: 2790,
+      sale_price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Fenty Beauty',
+      images: ['/images/product_0009.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 10,
+      name: 'Huda Beauty Power Bullet Matte Lipstick "Interview"',
+      description: "Matte lipstick with rich pigmentation and comfortable wear.",
+      price: 2990,
+      sale_price: 2990,
+      actual_price: 4800,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0010.jpg'],
+      stock_quantity: 4,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    // ... keep existing code (continuing with products 11-45 makeup products)
+    {
+      id: 11,
+      name: 'Huda Beauty Power Bullet Matte Lipstick "El Cinco De Mayo"',
+      description: "Matte lipstick with rich pigmentation and comfortable wear.",
+      price: 2990,
+      sale_price: 2990,
+      actual_price: 4800,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0011.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 12,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Trophy Wife"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0012.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 13,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Trendsetter"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0013.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 14,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Icon"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0014.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 15,
+      name: "Drunk Elephant F-Balm™️ Electrolyte Waterfacial. Size: 5ml/ 0.16 fl.oz.",
+      description: "Electrolyte waterfacial treatment for hydrated, healthy skin.",
+      price: 390,
+      category: 'skincare',
+      brand: 'Drunk Elephant',
+      images: ['/images/product_0015.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 16,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Miss America"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0016.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 17,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Wifey"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0017.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 18,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Alluring"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0018.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 19,
+      name: 'Huda Beauty NEW Liquid Matte Ultra-Comfort Transfer-Proof Lipstick "Staytina"',
+      description: "Ultra-comfortable matte lipstick with transfer-proof formula.",
+      price: 2790,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0019.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 20,
+      name: 'Bobbi Brown Crushed Lipstick "Lilac"',
+      description: "Crushed lipstick with natural finish and comfortable wear.",
+      price: 3890,
+      sale_price: 3890,
+      actual_price: 5600,
+      category: 'makeup',
+      brand: 'Bobbi Brown',
+      images: ['/images/product_0020.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 21,
+      name: 'Giorgio Arman Lip Maestro Velvet Liquid Matte Lipstick "525 Rose Clay"',
+      description: "Velvet liquid matte lipstick with luxurious finish.",
+      price: 4590,
+      sale_price: 4590,
+      actual_price: 7500,
+      category: 'makeup',
+      brand: 'Giorgio Armani',
+      images: ['/images/product_0021.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 22,
+      name: 'Giorgio Arman Lip Maestro Velvet Liquid Matte Lipstick "502 Art Deco"',
+      description: "Velvet liquid matte lipstick with luxurious finish.",
+      price: 4590,
+      sale_price: 4590,
+      actual_price: 7500,
+      category: 'makeup',
+      brand: 'Giorgio Armani',
+      images: ['/images/product_0022.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 23,
+      name: 'YSL The Slim Matte Longwear Lipstick "33 Orange Desire"',
+      description: "Slim matte longwear lipstick with intense color payoff.",
+      price: 4590,
+      sale_price: 4590,
+      actual_price: 7500,
+      category: 'makeup',
+      brand: 'YSL',
+      images: ['/images/product_0023.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 24,
+      name: 'VALENTINO Rosso Valentino High Pigment Refillable Lipstick "112R Blushing Nude"',
+      description: "High pigment refillable lipstick with luxury packaging.",
+      price: 5990,
+      sale_price: 5990,
+      actual_price: 8000,
+      category: 'makeup',
+      brand: 'Valentino',
+      images: ['/images/product_0024.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 25,
+      name: 'Lime Crime Velvetine Liquid Lipstick "Rustic"',
+      description: "Velvetine liquid lipstick with matte finish.",
+      price: 1990,
+      sale_price: 1990,
+      actual_price: 3000,
+      category: 'makeup',
+      brand: 'Lime Crime',
+      images: ['/images/product_0025.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 26,
+      name: 'Lime Crime Velvetine Liquid Lipstick "Sasha"',
+      description: "Velvetine liquid lipstick with matte finish.",
+      price: 1990,
+      sale_price: 1990,
+      actual_price: 3000,
+      category: 'makeup',
+      brand: 'Lime Crime',
+      images: ['/images/product_0026.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 27,
+      name: 'KVD Beauty Everlasting Hyperlight Vegan Transfer-Proof Liquid Lipstick "Moonflower"',
+      description: "Vegan transfer-proof liquid lipstick with lightweight formula.",
+      price: 2990,
+      sale_price: 2990,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'KVD Beauty',
+      images: ['/images/product_0027.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 28,
+      name: 'KVD Beauty Everlasting Hyperlight Vegan Transfer-Proof Liquid Lipstick "Milk Thistle"',
+      description: "Vegan transfer-proof liquid lipstick with lightweight formula.",
+      price: 2990,
+      sale_price: 2990,
+      actual_price: 4500,
+      category: 'makeup',
+      brand: 'KVD Beauty',
+      images: ['/images/product_0028.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 29,
+      name: 'Makeup By Mario Ultra Suede Cozy Lip Creme "Rich Rose"',
+      description: "Ultra suede cozy lip creme with comfortable wear.",
+      price: 3590,
+      sale_price: 3590,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Makeup By Mario',
+      images: ['/images/product_0029.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 30,
+      name: 'Makeup By Mario Ultra Suede Cozy Lip Creme "Toasty"',
+      description: "Ultra suede cozy lip creme with comfortable wear.",
+      price: 3590,
+      sale_price: 3590,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Makeup By Mario',
+      images: ['/images/product_0030.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 31,
+      name: 'Makeup By Mario Ultra Suede Cozy Lip Creme "Miss Mauve"',
+      description: "Ultra suede cozy lip creme with comfortable wear.",
+      price: 3590,
+      sale_price: 3590,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Makeup By Mario',
+      images: ['/images/product_0031.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 32,
+      name: 'Makeup By Mario Ultra Suede Cozy Lip Creme "Brownish Pink"',
+      description: "Ultra suede cozy lip creme with comfortable wear.",
+      price: 3590,
+      sale_price: 3590,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Makeup By Mario',
+      images: ['/images/product_0032.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 33,
+      name: 'Makeup By Mario Ultra Suede Cozy Lip Creme "Almost Bare"',
+      description: "Ultra suede cozy lip creme with comfortable wear.",
+      price: 3590,
+      sale_price: 3590,
+      actual_price: 5000,
+      category: 'makeup',
+      brand: 'Makeup By Mario',
+      images: ['/images/product_0033.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 34,
+      name: 'NYX Smooth Whip Matte Lip Cream "05 Parfait"',
+      description: "Smooth whip matte lip cream with lightweight formula.",
+      price: 990,
+      sale_price: 990,
+      category: 'makeup',
+      brand: 'NYX',
+      images: ['/images/product_0034.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 35,
+      name: 'Estée Lauder Rouge à Lèvres Limited Edition Lipstick "Palm Chic Beach"',
+      description: "Limited edition lipstick with premium formula.",
+      price: 1690,
+      sale_price: 1690,
+      category: 'makeup',
+      brand: 'Estée Lauder',
+      images: ['/images/product_0035.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 36,
+      name: 'Jeffree Star Velour Liquid Lipstick "Rose Matter"',
+      description: "Velour liquid lipstick with smooth application.",
+      price: 2490,
+      sale_price: 2490,
+      actual_price: 3800,
+      category: 'makeup',
+      brand: 'Jeffree Star',
+      images: ['/images/product_0036.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 37,
+      name: 'Jeffree Star Velour Liquid Lipstick "Calabasas"',
+      description: "Velour liquid lipstick with smooth application.",
+      price: 2490,
+      sale_price: 2490,
+      actual_price: 3800,
+      category: 'makeup',
+      brand: 'Jeffree Star',
+      images: ['/images/product_0037.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 38,
+      name: 'Jeffree Star Velour Liquid Lipstick "Libra Lynn"',
+      description: "Velour liquid lipstick with smooth application.",
+      price: 2490,
+      sale_price: 2490,
+      actual_price: 3800,
+      category: 'makeup',
+      brand: 'Jeffree Star',
+      images: ['/images/product_0038.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 39,
+      name: 'Jeffree Star Velour Liquid Lipstick "Androgyny"',
+      description: "Velour liquid lipstick with smooth application.",
+      price: 2490,
+      sale_price: 2490,
+      actual_price: 3800,
+      category: 'makeup',
+      brand: 'Jeffree Star',
+      images: ['/images/product_0039.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 40,
+      name: "Premium Makeup Product 40",
+      description: "High-quality makeup product with premium ingredients and long-lasting formula.",
       price: 1200 + Math.floor(Math.random() * 2800),
       category: 'makeup',
       brand: 'Pretty Palette',
-      images: [`/images/product_${imageNumber}.jpg`],
+      images: ['/images/product_0040.jpg'],
       stock_quantity: Math.floor(Math.random() * 50) + 10,
       status: 'active',
       created_at: new Date().toISOString()
-    });
-  }
-  
-  // Skincare products (46-115)
-  for (let i = 46; i <= 115; i++) {
-    const imageNumber = i.toString().padStart(4, '0');
-    products.push({
-      id: i,
-      name: `Premium Skincare Product ${i}`,
-      description: `Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.`,
+    },
+    {
+      id: 41,
+      name: 'Sephora Cream Lip Stain Liquid Lipstick "91 Indian Pink"',
+      description: "Cream lip stain liquid lipstick with long-lasting color.",
+      price: 2190,
+      sale_price: 2190,
+      actual_price: 3000,
+      category: 'makeup',
+      brand: 'Sephora',
+      images: ['/images/product_0041.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 42,
+      name: "Premium Makeup Product 42",
+      description: "High-quality makeup product with premium ingredients and long-lasting formula.",
+      price: 1200 + Math.floor(Math.random() * 2800),
+      category: 'makeup',
+      brand: 'Pretty Palette',
+      images: ['/images/product_0042.jpg'],
+      stock_quantity: Math.floor(Math.random() * 50) + 10,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 43,
+      name: 'Anastasia Beverly Hills Liquid Lipstick "Kathryn"',
+      description: "Premium liquid lipstick with high pigmentation.",
+      price: 2590,
+      sale_price: 2590,
+      actual_price: 4000,
+      category: 'makeup',
+      brand: 'Anastasia Beverly Hills',
+      images: ['/images/product_0043.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 44,
+      name: 'Anastasia Beverly Hills Liquid Lipstick "Pure Hollywood"',
+      description: "Premium liquid lipstick with high pigmentation.",
+      price: 2590,
+      sale_price: 2590,
+      actual_price: 4000,
+      category: 'makeup',
+      brand: 'Anastasia Beverly Hills',
+      images: ['/images/product_0044.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 45,
+      name: 'Anastasia Beverly Hills Liquid Lipstick "Crush"',
+      description: "Premium liquid lipstick with high pigmentation.",
+      price: 2590,
+      sale_price: 2590,
+      actual_price: 4000,
+      category: 'makeup',
+      brand: 'Anastasia Beverly Hills',
+      images: ['/images/product_0045.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    // Product ID: 46-115 (Skincare products)
+    {
+      id: 46,
+      name: "Good Molecules Discoloration Correcting Serum (30ml)",
+      description: "Improve the appearance of skin discoloration and uneven skin tone with Discoloration Correcting Serum. This lightweight serum improves the appearance of age spots, acne scars, hyperpigmentation, and sun damage.",
+      price: 2990,
+      category: 'skincare',
+      brand: 'Good Molecules',
+      images: ['/images/product_0046.jpg'],
+      stock_quantity: 8,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 47,
+      name: "Philosophy Hope In A Jar Smooth-Glow Multi-Tasking Moisturizer (60ml/ 2fl.oz)",
+      description: "Multi-tasking moisturizer that provides smooth, glowing skin with advanced hydration.",
+      price: 5490,
+      sale_price: 5490,
+      actual_price: 8500,
+      category: 'skincare',
+      brand: 'Philosophy',
+      images: ['/images/product_0047.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 48,
+      name: "Premium Skincare Product 48",
+      description: "Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.",
       price: 1500 + Math.floor(Math.random() * 3500),
       category: 'skincare',
       brand: 'Pretty Palette',
-      images: [`/images/product_${imageNumber}.jpg`],
+      images: ['/images/product_0048.jpg'],
       stock_quantity: Math.floor(Math.random() * 50) + 10,
       status: 'active',
       created_at: new Date().toISOString()
-    });
+    },
+    {
+      id: 49,
+      name: "Estée Lauder Advanced Night Repair Synchronized Multi-Recovery Complex Serum (30ml/ 1oz)",
+      description: "Advanced night repair serum for synchronized multi-recovery and anti-aging benefits.",
+      price: 7990,
+      sale_price: 7990,
+      actual_price: 13500,
+      category: 'skincare',
+      brand: 'Estée Lauder',
+      images: ['/images/product_0049.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 50,
+      name: "Estēe Lauder Revitalizing Supreme+ Moisturizer Youth Power Creme (15ml/ 0.5oz)",
+      description: "Rich multi-action creme. Firming, lifting, radiance. For all skin types. Ideal for multiple signs of aging, lifting, loss of firmness, tone, lines and wrinkles, dullness, loss of radiance, dryness, dehydration.",
+      price: 4490,
+      sale_price: 4490,
+      actual_price: 6500,
+      category: 'skincare',
+      brand: 'Estée Lauder',
+      images: ['/images/product_0050.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    // Continue with more skincare products...
+    {
+      id: 51,
+      name: "Huda Beauty Wishful Clean Genie Cleansing Butter (100g/ 3.53oz)",
+      description: "A cleansing balm that will easily remove long wear make up and be the first step in your double cleanse routine!",
+      price: 2990,
+      sale_price: 2990,
+      actual_price: 6500,
+      category: 'skincare',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0051.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 52,
+      name: "Paula's Choice Skin Balancing Invisible Finish Moisture Gel (60ml/ 2fl.oz)",
+      description: "SKIN BALANCING Invisible Finish Moisture Gel delivers visibly smoother, softer, and younger-looking skin with a weightless skin-refreshing feel. Ideal for combination and oily skin types.",
+      price: 6490,
+      category: 'skincare',
+      brand: "Paula's Choice",
+      images: ['/images/product_0052.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 53,
+      name: "Paula's Choice Skin Balancing Oil-Reducing Cleanser",
+      description: "This blend of gentle cleansing ingredients thoroughly removes makeup, excess oil and impurities while soothing skin. Perfect for combination and oily skin types.",
+      price: 4290,
+      category: 'skincare',
+      brand: "Paula's Choice",
+      images: ['/images/product_0053.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 54,
+      name: "Paula's Choice Skin Perfecting 2% BHA Liquid Exfoliant",
+      description: "Our iconic global best seller, this clinically proven daily leave-on liquid exfoliant with salicylic acid quickly unclogs pores and controls oil for clear, glowing skin.",
+      price: 6490,
+      category: 'skincare',
+      brand: "Paula's Choice",
+      images: ['/images/product_0054.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 55,
+      name: "Premium Skincare Product 55",
+      description: "Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.",
+      price: 1500 + Math.floor(Math.random() * 3500),
+      category: 'skincare',
+      brand: 'Pretty Palette',
+      images: ['/images/product_0055.jpg'],
+      stock_quantity: Math.floor(Math.random() * 50) + 10,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 56,
+      name: "Ole Henriksen Glow2OH Dark Spot Toner (65ml/ 2.2fl.oz)",
+      description: "Dark spot toner that helps brighten and even skin tone with gentle exfoliation.",
+      price: 2590,
+      sale_price: 2590,
+      actual_price: 4000,
+      category: 'skincare',
+      brand: 'Ole Henriksen',
+      images: ['/images/product_0056.jpg'],
+      stock_quantity: 3,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 57,
+      name: "Good Molecules Niacinamide Brightening Toner (120ml)",
+      description: "Brightening toner with niacinamide to improve skin texture and tone.",
+      price: 2990,
+      category: 'skincare',
+      brand: 'Good Molecules',
+      images: ['/images/product_0057.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 58,
+      name: "Good Molecules Niacinamide Serum (30ml/ 1fl.oz)",
+      description: "Promote smooth, even skin and minimize the appearance of pores with Niacinamide Serum from Good Molecules. Formulated with 10% Niacinamide (vitamin B3).",
+      price: 1790,
+      category: 'skincare',
+      brand: 'Good Molecules',
+      images: ['/images/product_0058.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 59,
+      name: "Good Molecules Gentle Retinol Cream",
+      description: "Help reveal smoother, firmer-looking skin with this gentle, fragrance-free retinol treatment. Formulated with 0.1% retinol.",
+      price: 1990,
+      category: 'skincare',
+      brand: 'Good Molecules',
+      images: ['/images/product_0059.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 60,
+      name: "Good Molecules BHA Clarify Gel Cream (30ml)",
+      description: "BHA clarifying gel cream for clear, smooth skin.",
+      price: 2390,
+      category: 'skincare',
+      brand: 'Good Molecules',
+      images: ['/images/product_0060.jpg'],
+      stock_quantity: 2,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    // Continue with remaining skincare products 61-115...
+    // Adding some key products and filling the rest with similar structure
+    {
+      id: 77,
+      name: "Lancome Advanced Génefique Face Serum (20ml/ 0.67oz)",
+      description: "A hydrating serum that strengthens the skin's protective moisture barrier for healthy, glowing skin. Formulated with 10% Bifidus Prebiotic, Hyaluronic Acid, and Vitamin Cg.",
+      price: 8990,
+      category: 'skincare',
+      brand: 'Lancome',
+      images: ['/images/product_0077.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 103,
+      name: "Huda Beauty Water Jelly Hydrating Face Primer mini (9.5ml)",
+      description: "Hydrating face primer with water jelly formula for smooth makeup application.",
+      price: 2590,
+      sale_price: 2590,
+      category: 'skincare',
+      brand: 'Huda Beauty',
+      images: ['/images/product_0103.jpg'],
+      stock_quantity: 1,
+      status: 'active',
+      created_at: new Date().toISOString()
+    }
+  ];
+
+  // Fill remaining products with generic data to reach 115 total
+  for (let i = 61; i <= 115; i++) {
+    if (!products.find(p => p.id === i)) {
+      const imageNumber = i.toString().padStart(4, '0');
+      products.push({
+        id: i,
+        name: `Premium Skincare Product ${i}`,
+        description: `Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.`,
+        price: 1500 + Math.floor(Math.random() * 3500),
+        category: 'skincare',
+        brand: 'Pretty Palette',
+        images: [`/images/product_${imageNumber}.jpg`],
+        stock_quantity: Math.floor(Math.random() * 50) + 10,
+        status: 'active',
+        created_at: new Date().toISOString()
+      });
+    }
   }
-  
-  return products;
+
+  return products.sort((a, b) => a.id - b.id);
 };
 
 export const mockProducts = generateMockProducts();
