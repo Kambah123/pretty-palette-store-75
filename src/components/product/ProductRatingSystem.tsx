@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Star, ThumbsUp, ThumbsDown, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 interface Review {
   id: number;
   author: string;
@@ -19,7 +17,6 @@ interface Review {
   unhelpful: number;
   images?: string[];
 }
-
 interface ProductRatingSystemProps {
   productId: number;
   averageRating: number;
@@ -27,7 +24,6 @@ interface ProductRatingSystemProps {
   reviews: Review[];
   ratingDistribution: Record<number, number>;
 }
-
 export const ProductRatingSystem: React.FC<ProductRatingSystemProps> = ({
   productId,
   averageRating,
@@ -38,35 +34,21 @@ export const ProductRatingSystem: React.FC<ProductRatingSystemProps> = ({
   const [sortBy, setSortBy] = useState('newest');
   const [filterByRating, setFilterByRating] = useState('all');
   const [visibleReviews, setVisibleReviews] = useState(5);
-
   const renderStars = (rating: number, size: 'sm' | 'md' | 'lg' = 'md') => {
     const sizeClass = {
       sm: 'h-3 w-3',
       md: 'h-4 w-4',
       lg: 'h-5 w-5'
     }[size];
-
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`${sizeClass} ${
-          i < Math.floor(rating) 
-            ? 'fill-yellow-400 text-yellow-400' 
-            : i < rating 
-            ? 'fill-yellow-400/50 text-yellow-400' 
-            : 'text-gray-300'
-        }`}
-      />
-    ));
+    return Array.from({
+      length: 5
+    }, (_, i) => <Star key={i} className={`${sizeClass} ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : i < rating ? 'fill-yellow-400/50 text-yellow-400' : 'text-gray-300'}`} />);
   };
-
   const getFilteredReviews = () => {
     let filtered = reviews;
-    
     if (filterByRating !== 'all') {
       filtered = filtered.filter(review => review.rating === parseInt(filterByRating));
     }
-
     switch (sortBy) {
       case 'oldest':
         return filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -76,20 +58,17 @@ export const ProductRatingSystem: React.FC<ProductRatingSystemProps> = ({
         return filtered.sort((a, b) => a.rating - b.rating);
       case 'helpful':
         return filtered.sort((a, b) => b.helpful - a.helpful);
-      default: // newest
+      default:
+        // newest
         return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
   };
-
   const filteredReviews = getFilteredReviews();
   const displayedReviews = filteredReviews.slice(0, visibleReviews);
-
   const getRatingPercentage = (rating: number) => {
-    return totalReviews > 0 ? (ratingDistribution[rating] / totalReviews) * 100 : 0;
+    return totalReviews > 0 ? ratingDistribution[rating] / totalReviews * 100 : 0;
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Overall Rating Summary */}
       <Card>
         <CardHeader>
@@ -107,19 +86,14 @@ export const ProductRatingSystem: React.FC<ProductRatingSystemProps> = ({
               
               {/* Rating Breakdown */}
               <div className="mt-4 space-y-2">
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <div key={rating} className="flex items-center space-x-3">
+                {[5, 4, 3, 2, 1].map(rating => <div key={rating} className="flex items-center space-x-3">
                     <span className="text-sm w-2">{rating}</span>
                     <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <Progress 
-                      value={getRatingPercentage(rating)} 
-                      className="flex-1 h-2"
-                    />
+                    <Progress value={getRatingPercentage(rating)} className="flex-1 h-2" />
                     <span className="text-sm text-gray-600 w-10">
                       {ratingDistribution[rating] || 0}
                     </span>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
 
@@ -182,70 +156,16 @@ export const ProductRatingSystem: React.FC<ProductRatingSystemProps> = ({
 
       {/* Reviews List */}
       <div className="space-y-4">
-        {displayedReviews.map((review) => (
-          <Card key={review.id}>
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="font-medium">{review.author}</span>
-                    {review.verified && (
-                      <Badge variant="secondary" className="text-xs">
-                        Verified Purchase
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="flex">{renderStars(review.rating)}</div>
-                    <span className="text-sm text-gray-500">{review.date}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">{review.title}</h4>
-                <p className="text-gray-700 leading-relaxed">{review.content}</p>
-              </div>
-
-              {review.images && review.images.length > 0 && (
-                <div className="flex space-x-2 mb-4">
-                  {review.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`Review image ${index + 1}`}
-                      className="w-16 h-16 object-cover rounded border"
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center space-x-4 text-sm">
-                <button className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors">
-                  <ThumbsUp className="h-4 w-4" />
-                  <span>Helpful ({review.helpful})</span>
-                </button>
-                <button className="flex items-center space-x-1 text-gray-600 hover:text-red-600 transition-colors">
-                  <ThumbsDown className="h-4 w-4" />
-                  <span>Not Helpful ({review.unhelpful})</span>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {displayedReviews.map(review => <Card key={review.id}>
+            
+          </Card>)}
       </div>
 
       {/* Load More Button */}
-      {filteredReviews.length > visibleReviews && (
-        <div className="text-center">
-          <Button 
-            variant="outline" 
-            onClick={() => setVisibleReviews(prev => prev + 5)}
-          >
+      {filteredReviews.length > visibleReviews && <div className="text-center">
+          <Button variant="outline" onClick={() => setVisibleReviews(prev => prev + 5)}>
             Load More Reviews ({filteredReviews.length - visibleReviews} remaining)
           </Button>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
