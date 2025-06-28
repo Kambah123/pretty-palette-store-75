@@ -133,7 +133,7 @@ const Products = () => {
       <CardContent className="p-0">
         <div className="relative">
           <img
-            src={getProductImage(product.images)}
+            src={getProductImage(product.images, product.id)}
             alt={product.name}
             className="w-full h-48 object-cover rounded-t-lg"
             loading="lazy"

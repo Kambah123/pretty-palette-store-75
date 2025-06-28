@@ -8,10 +8,15 @@ import { getProductImages, handleImageError } from '@/utils/imageUtils';
 interface ProductImageGalleryProps {
   images: string[] | null | undefined;
   productName: string;
+  productId?: string | number;
 }
 
-export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, productName }) => {
-  const productImages = getProductImages(images);
+export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ 
+  images, 
+  productName, 
+  productId 
+}) => {
+  const productImages = getProductImages(images, productId);
   const [currentImage, setCurrentImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
@@ -48,6 +53,12 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images
           onError={() => handleImageLoadError(currentImage)}
           onLoad={() => console.log(`Image loaded successfully: ${productImages[currentImage]}`)}
         />
+        
+        {/* Product Info Overlay for Placeholder */}
+        <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded-lg">
+          <h3 className="font-semibold text-lg">{productName}</h3>
+          <p className="text-sm opacity-90">Price: TBA</p>
+        </div>
         
         {/* Zoom Icon */}
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
