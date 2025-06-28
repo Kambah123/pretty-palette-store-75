@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SearchWithSuggestions } from '@/components/search/SearchWithSuggestions';
 import { Filter, Star, Heart, ShoppingCart, ArrowLeft, Grid, List } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -34,7 +35,7 @@ const Products = () => {
     }
   }, [category]);
 
-  const { data: products = [], isLoading } = useProducts({
+  const { data: products = [], isLoading, error } = useProducts({
     category: category,
     searchTerm: searchTerm,
     sortBy: sortBy,
@@ -204,26 +205,36 @@ const Products = () => {
     </Card>
   );
 
-  if (isLoading) {
+  const ProductCardSkeleton = () => (
+    <Card>
+      <CardContent className="p-0">
+        <Skeleton className="w-full h-48 rounded-t-lg" />
+        <div className="p-4 space-y-3">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (error) {
+    console.error('Products loading error:', error);
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="py-4 sm:py-8">
+        <div className="py-8">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <CardContent className="p-0">
-                    <div className="bg-gray-300 h-48 rounded-t-lg"></div>
-                    <div className="p-4 space-y-3">
-                      <div className="bg-gray-300 h-4 rounded w-3/4"></div>
-                      <div className="bg-gray-300 h-6 rounded w-full"></div>
-                      <div className="bg-gray-300 h-4 rounded w-1/2"></div>
-                      <div className="bg-gray-300 h-8 rounded w-full"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="text-center py-12">
+              <p className="text-red-500 text-lg">Error loading products. Please try again.</p>
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page
+              </Button>
             </div>
           </div>
         </div>
@@ -317,17 +328,25 @@ const Products = () => {
             </div>
 
             <div className="flex-1">
-              <div className="mb-4 text-sm text-gray-600">
-                Showing {products.length} products
-              </div>
+              {!isLoading && (
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {products.length} products
+                </div>
+              )}
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 9 }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))
+                ) : (
+                  products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                )}
               </div>
               
-              {products.length === 0 && (
+              {!isLoading && products.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
                   <Button 
