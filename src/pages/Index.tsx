@@ -5,6 +5,7 @@ import HeroSection from '@/components/HeroSection';
 import ProductCategories from '@/components/ProductCategories';
 import PromotionalBanners from '@/components/PromotionalBanners';
 import FeaturedProducts from '@/components/FeaturedProducts';
+import ProductGallery from '@/components/ProductGallery';
 import ShopByCategory from '@/components/ShopByCategory';
 import Footer from '@/components/Footer';
 
@@ -16,6 +17,7 @@ const Index = () => {
       <ProductCategories />
       <PromotionalBanners />
       <FeaturedProducts />
+      <ProductGallery />
       <ShopByCategory />
       <Footer />
     </div>

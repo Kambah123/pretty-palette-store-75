@@ -122,5 +122,3 @@ const ProductCategories = () => {
 };
 
 export default ProductCategories;
-
-

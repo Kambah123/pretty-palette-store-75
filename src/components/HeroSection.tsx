@@ -6,18 +6,7 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/lovable-uploads/bb3550c0-a114-4387-b1a8-76e2b57a481e.png)'
-        }}
-      ></div>
-      
-      {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-white/80"></div>
-      
+    <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
           {/* Logo */}
