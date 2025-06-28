@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,7 @@ const mockRatingDistribution = {
 const ProductDetail = () => {
   const { id } = useParams();
   const { data: product, isLoading } = useProduct(id || '');
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(1);  // Explicitly set as number
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = () => {
@@ -143,12 +144,16 @@ const ProductDetail = () => {
   const maxQuantity = Number(product.stock_quantity) || 0;
 
   const handleQuantityDecrease = () => {
-    setQuantity(Math.max(1, quantity - 1));
+    setQuantity(prev => Math.max(1, prev - 1));
   };
 
   const handleQuantityIncrease = () => {
-    setQuantity(Math.min(maxQuantity, quantity + 1));
+    setQuantity(prev => Math.min(maxQuantity, prev + 1));
   };
+
+  // Ensure product images are properly formatted as string array
+  const productImages = Array.isArray(product.images) ? product.images : [];
+  console.log('Product images:', productImages); // Debug log
 
   return (
     <div className="min-h-screen bg-white">
@@ -176,7 +181,7 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Product Images */}
           <div>
-            <ProductImageGallery images={product.images} productName={product.name} />
+            <ProductImageGallery images={productImages} productName={product.name} />
           </div>
 
           {/* Product Info */}
