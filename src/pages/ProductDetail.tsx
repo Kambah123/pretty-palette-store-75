@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -151,6 +150,11 @@ const ProductDetail = () => {
     setQuantity(prev => Math.min(maxQuantity, prev + 1));
   };
 
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setQuantity(Math.max(1, Math.min(maxQuantity, value)));
+  };
+
   // Ensure product images are properly formatted as string array
   const productImages = Array.isArray(product.images) ? product.images : [];
   console.log('Product images:', productImages); // Debug log
@@ -239,7 +243,14 @@ const ProductDetail = () => {
                     >
                       -
                     </button>
-                    <span className="px-4 py-2 border-x min-w-[60px] text-center">{quantity}</span>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={handleQuantityChange}
+                      className="px-4 py-2 border-x min-w-[60px] text-center outline-none"
+                      min="1"
+                      max={maxQuantity}
+                    />
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
                       onClick={handleQuantityIncrease}
