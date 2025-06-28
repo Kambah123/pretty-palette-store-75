@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,7 @@ const mockRatingDistribution = {
 const ProductDetail = () => {
   const { id } = useParams();
   const { data: product, isLoading } = useProduct(id || '');
-  const [quantity, setQuantity] = useState<number>(1);  // Explicitly set as number
+  const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = () => {
@@ -151,8 +152,16 @@ const ProductDetail = () => {
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1;
-    setQuantity(Math.max(1, Math.min(maxQuantity, value)));
+    const inputValue = e.target.value;
+    const numericValue = parseInt(inputValue, 10);
+    
+    if (isNaN(numericValue) || numericValue < 1) {
+      setQuantity(1);
+    } else if (numericValue > maxQuantity) {
+      setQuantity(maxQuantity);
+    } else {
+      setQuantity(numericValue);
+    }
   };
 
   // Ensure product images are properly formatted as string array
