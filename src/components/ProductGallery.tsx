@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Eye } from 'lucide-react';
-
 const ProductGallery = () => {
   // Generate array of first 10 products only for a cleaner home page
   const productImages = [];
@@ -13,7 +11,6 @@ const ProductGallery = () => {
     const isSkincareProduct = i >= 6; // Adjust for smaller sample
     const basePrice = isSkincareProduct ? 1500 : 1200;
     const randomPrice = basePrice + Math.floor(Math.random() * 2000);
-    
     productImages.push({
       id: i,
       image: `/images/product_${imageNumber}.jpg`,
@@ -22,9 +19,7 @@ const ProductGallery = () => {
       price: randomPrice
     });
   }
-
-  return (
-    <section className="py-16 bg-gray-50">
+  return <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -36,23 +31,13 @@ const ProductGallery = () => {
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {productImages.map((product) => (
-            <Card 
-              key={`product-${product.id}`}
-              className="overflow-hidden hover:shadow-lg transition-all duration-300 hover-lift cursor-pointer group"
-            >
+          {productImages.map(product => <Card key={`product-${product.id}`} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover-lift cursor-pointer group">
               <CardContent className="p-0">
                 <Link to={`/product/${product.id}`}>
                   <div className="aspect-square overflow-hidden relative">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=crop';
-                      }}
-                    />
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" onError={e => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=crop';
+                }} />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <Eye className="h-6 w-6 text-white" />
@@ -72,15 +57,11 @@ const ProductGallery = () => {
                     <span className="font-semibold text-pink-600 text-sm">৳{product.price}</span>
                   </div>
                   <div className="flex space-x-1">
-                    <Button 
-                      size="sm" 
-                      className="flex-1 bg-pink-600 hover:bg-pink-700 text-xs h-7"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        console.log(`Adding ${product.name} to cart`);
-                        // Add to cart functionality
-                      }}
-                    >
+                    <Button size="sm" className="flex-1 bg-pink-600 hover:bg-pink-700 text-xs h-7" onClick={e => {
+                  e.preventDefault();
+                  console.log(`Adding ${product.name} to cart`);
+                  // Add to cart functionality
+                }}>
                       <ShoppingCart className="h-3 w-3 mr-1" />
                       Add
                     </Button>
@@ -92,20 +73,15 @@ const ProductGallery = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
         
         <div className="text-center mt-12">
           <Link to="/products">
-            <Button size="lg" className="bg-pink-600 hover:bg-pink-700">
-              View All 115+ Products
-            </Button>
+            <Button size="lg" className="bg-pink-600 hover:bg-pink-700">View All </Button>
           </Link>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default ProductGallery;
