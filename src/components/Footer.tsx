@@ -43,7 +43,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold">Get in Touch</h3>
             <div className="space-y-2 text-gray-300 text-sm">
               <p>📧 hello@siacollections.com</p>
-              <p>📞 +880 1XXX-XXXXXX</p>
+              <p>📞 +8801727627194 </p>
               <p>📍 Dhaka, Bangladesh</p>
             </div>
             
