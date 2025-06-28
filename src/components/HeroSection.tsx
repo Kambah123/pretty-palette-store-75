@@ -11,7 +11,7 @@ const HeroSection = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(/lovable-uploads/3328c8a9-0f6b-41e3-ae55-c9344f828827.png)'
+          backgroundImage: 'url(/lovable-uploads/bb3550c0-a114-4387-b1a8-76e2b57a481e.png)'
         }}
       ></div>
       
@@ -26,6 +26,7 @@ const HeroSection = () => {
               src="/lovable-uploads/0301ff21-6fb9-4809-bfbb-e5cc54cf2e20.png" 
               alt="SIA Collections Logo" 
               className="mx-auto h-20 w-auto mb-4"
+              loading="eager"
             />
           </div>
           

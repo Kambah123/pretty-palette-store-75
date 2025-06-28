@@ -14,7 +14,7 @@ const ProductCategories = () => {
       gradient: 'from-pink-400 to-pink-600',
       bgColor: 'bg-pink-50',
       iconColor: 'text-pink-600',
-      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop&auto=format',
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop&auto=format&q=80',
       isHotSale: true
     },
     {
@@ -24,7 +24,7 @@ const ProductCategories = () => {
       gradient: 'from-purple-400 to-purple-600',
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
-      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=300&fit=crop&auto=format',
+      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=300&fit=crop&auto=format&q=80',
       isHotSale: false
     },
     {
@@ -34,7 +34,7 @@ const ProductCategories = () => {
       gradient: 'from-pink-500 to-purple-500',
       bgColor: 'bg-gradient-to-br from-pink-50 to-purple-50',
       iconColor: 'text-pink-600',
-      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop&auto=format',
+      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop&auto=format&q=80',
       isHotSale: false
     },
     {
@@ -44,7 +44,7 @@ const ProductCategories = () => {
       gradient: 'from-purple-500 to-pink-500',
       bgColor: 'bg-gradient-to-br from-purple-50 to-pink-50',
       iconColor: 'text-purple-600',
-      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop&auto=format',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop&auto=format&q=80',
       isHotSale: false
     }
   ];
@@ -89,6 +89,8 @@ const ProductCategories = () => {
                       src={category.image}
                       alt={category.title}
                       className="w-full h-32 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-200"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   
