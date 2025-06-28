@@ -1,16 +1,4 @@
 
-// Import the image URLs from the public directory
-const getImageUrls = () => {
-  // Try to load the image URLs from the public directory
-  try {
-    // This will be available at runtime from the public directory
-    return window.imageUrls || [];
-  } catch (error) {
-    console.log('Image URLs not loaded, using fallback');
-    return [];
-  }
-};
-
 // Generate local image URLs for products
 const generateLocalImageUrls = (count: number = 115): string[] => {
   const urls = [];
@@ -19,6 +7,15 @@ const generateLocalImageUrls = (count: number = 115): string[] => {
     urls.push(`/images/product_${imageNumber}.jpg`);
   }
   return urls;
+};
+
+// Get images from window.imageUrls or generate fallback
+const getImageUrls = (): string[] => {
+  if (typeof window !== 'undefined' && window.imageUrls && window.imageUrls.length > 0) {
+    return window.imageUrls;
+  }
+  // Fallback to generating local URLs
+  return generateLocalImageUrls();
 };
 
 // Placeholder images for when products don't have images
@@ -38,9 +35,10 @@ export const getProductImages = (images: string[] | null | undefined, productId?
     }
   }
   
-  // Generate local images based on product ID
+  // Use local images from GitHub repository
+  const localImages = getImageUrls();
+  
   if (productId) {
-    const localImages = generateLocalImageUrls();
     const numericId = typeof productId === 'string' ? parseInt(productId) : productId;
     
     if (numericId && numericId <= localImages.length) {
@@ -54,8 +52,8 @@ export const getProductImages = (images: string[] | null | undefined, productId?
     return [localImages[randomIndex]];
   }
   
-  // Fallback to placeholder
-  return [PLACEHOLDER_IMAGES[0]];
+  // Fallback to first local image or placeholder
+  return localImages.length > 0 ? [localImages[0]] : [PLACEHOLDER_IMAGES[0]];
 };
 
 export const getProductImage = (images: string[] | null | undefined, productId?: string | number, index = 0): string => {
