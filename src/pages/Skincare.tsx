@@ -6,13 +6,23 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { mockProducts } from '@/data/mockProducts';
 
 const Skincare = () => {
-  // Filter skincare products (IDs 46-115) from mock data
-  const skincareProducts = mockProducts.filter(product => 
-    product.id >= 46 && product.id <= 115 && product.category === 'skincare'
-  );
+  // Generate skincare products (IDs 46-115) with corresponding images
+  const skincareProducts = [];
+  for (let i = 46; i <= 115; i++) {
+    const imageNumber = i.toString().padStart(4, '0');
+    skincareProducts.push({
+      id: i,
+      name: `Premium Skincare Product ${i}`,
+      description: `Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.`,
+      price: 1500 + Math.floor(Math.random() * 3500),
+      category: 'skincare',
+      brand: 'Pretty Palette',
+      images: [`/images/product_${imageNumber}.jpg`],
+      stock_quantity: Math.floor(Math.random() * 50) + 10,
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +57,8 @@ const Skincare = () => {
                         src={product.images[0]}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=crop';
                         }}

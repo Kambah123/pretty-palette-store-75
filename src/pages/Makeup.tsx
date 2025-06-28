@@ -6,13 +6,23 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { mockProducts } from '@/data/mockProducts';
 
 const Makeup = () => {
-  // Filter makeup products (IDs 1-45) from mock data
-  const makeupProducts = mockProducts.filter(product => 
-    product.id >= 1 && product.id <= 45 && product.category === 'makeup'
-  );
+  // Generate makeup products (IDs 1-45) with corresponding images
+  const makeupProducts = [];
+  for (let i = 1; i <= 45; i++) {
+    const imageNumber = i.toString().padStart(4, '0');
+    makeupProducts.push({
+      id: i,
+      name: `Premium Makeup Product ${i}`,
+      description: `High-quality makeup product with premium ingredients and long-lasting formula.`,
+      price: 1200 + Math.floor(Math.random() * 2800),
+      category: 'makeup',
+      brand: 'Pretty Palette',
+      images: [`/images/product_${imageNumber}.jpg`],
+      stock_quantity: Math.floor(Math.random() * 50) + 10,
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +57,8 @@ const Makeup = () => {
                         src={product.images[0]}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=crop';
                         }}
