@@ -61,7 +61,7 @@ const mockRatingDistribution = {
 const ProductDetail = () => {
   const { id } = useParams();
   const { data: product, isLoading } = useProduct(id || '');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = () => {
@@ -140,7 +140,7 @@ const ProductDetail = () => {
   }
 
   const isInStock = product.stock_quantity && product.stock_quantity > 0;
-  const maxQuantity = product.stock_quantity || 0;
+  const maxQuantity: number = product.stock_quantity || 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -229,7 +229,7 @@ const ProductDetail = () => {
                     <span className="px-4 py-2 border-x min-w-[60px] text-center">{quantity}</span>
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
-                      onClick={() => setQuantity(quantity + 1)}
+                      onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
                       disabled={quantity >= maxQuantity}
                     >
                       +
