@@ -6,19 +6,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { mockProducts } from '@/data/mockProducts';
 
 const Makeup = () => {
-  // Generate makeup product images (product_0001.jpg to product_0045.jpg)
-  const makeupProducts = [];
-  for (let i = 1; i <= 45; i++) {
-    const imageNumber = i.toString().padStart(4, '0');
-    makeupProducts.push({
-      id: i,
-      image: `/images/product_${imageNumber}.jpg`,
-      name: `Makeup Product ${i}`, // Placeholder name - can be updated manually later
-      price: Math.floor(Math.random() * 3000) + 500, // Random price for demo
-    });
-  }
+  // Filter makeup products (IDs 1-45) from mock data
+  const makeupProducts = mockProducts.filter(product => 
+    product.id >= 1 && product.id <= 45 && product.category === 'makeup'
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,7 +44,7 @@ const Makeup = () => {
                   <Link to={`/product/${product.id}`}>
                     <div className="aspect-square overflow-hidden">
                       <img
-                        src={product.image}
+                        src={product.images[0]}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         loading="lazy"
@@ -72,6 +66,10 @@ const Makeup = () => {
                       <Button 
                         size="sm" 
                         className="flex-1 bg-pink-600 hover:bg-pink-700 text-xs"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          console.log(`Adding ${product.name} to cart`);
+                        }}
                       >
                         <ShoppingCart className="h-3 w-3 mr-1" />
                         Add to Cart
