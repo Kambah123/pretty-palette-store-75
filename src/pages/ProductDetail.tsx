@@ -140,6 +140,7 @@ const ProductDetail = () => {
   }
 
   const isInStock = product.stock_quantity && product.stock_quantity > 0;
+  const maxQuantity = product.stock_quantity || 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -229,7 +230,7 @@ const ProductDetail = () => {
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
                       onClick={() => setQuantity(quantity + 1)}
-                      disabled={quantity >= (product.stock_quantity || 0)}
+                      disabled={quantity >= maxQuantity}
                     >
                       +
                     </button>
