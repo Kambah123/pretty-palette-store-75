@@ -1,21 +1,14 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SocialMediaLinks from './SocialMediaLinks';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white">
+  return <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <img 
-                src="/lovable-uploads/6d21888a-b154-49d2-a4c3-2fb2c377f1da.png" 
-                alt="SIA Collections Logo"
-                className="h-8 w-auto filter brightness-0 invert"
-              />
+              <img src="/lovable-uploads/6d21888a-b154-49d2-a4c3-2fb2c377f1da.png" alt="SIA Collections Logo" className="h-8 w-auto filter brightness-0 invert" />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               Your trusted destination for premium beauty products, fashion accessories, and lifestyle essentials.
@@ -53,14 +46,7 @@ const Footer = () => {
               <p>📞 +880 1XXX-XXXXXX</p>
               <p>📍 Dhaka, Bangladesh</p>
             </div>
-            <div className="pt-4 border-t border-gray-800">
-              <Link 
-                to="/login" 
-                className="text-gray-400 hover:text-pink-400 transition-colors text-sm"
-              >
-                Admin Login
-              </Link>
-            </div>
+            
           </div>
         </div>
 
@@ -70,8 +56,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
