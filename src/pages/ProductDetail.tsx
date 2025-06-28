@@ -140,7 +140,15 @@ const ProductDetail = () => {
   }
 
   const isInStock = product.stock_quantity && product.stock_quantity > 0;
-  const maxQuantity: number = Number(product.stock_quantity) || 0;
+  const maxQuantity = Number(product.stock_quantity) || 0;
+
+  const handleQuantityDecrease = () => {
+    setQuantity(Math.max(1, quantity - 1));
+  };
+
+  const handleQuantityIncrease = () => {
+    setQuantity(Math.min(maxQuantity, quantity + 1));
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -221,7 +229,7 @@ const ProductDetail = () => {
                   <div className="flex items-center border rounded-md">
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
-                      onClick={() => setQuantity(Math.max(1, Number(quantity) - 1))}
+                      onClick={handleQuantityDecrease}
                       disabled={quantity <= 1}
                     >
                       -
@@ -229,7 +237,7 @@ const ProductDetail = () => {
                     <span className="px-4 py-2 border-x min-w-[60px] text-center">{quantity}</span>
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
-                      onClick={() => setQuantity(Math.min(maxQuantity, Number(quantity) + 1))}
+                      onClick={handleQuantityIncrease}
                       disabled={quantity >= maxQuantity}
                     >
                       +
