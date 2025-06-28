@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 import { ProductRatingSystem } from "@/components/product/ProductRatingSystem";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
@@ -153,14 +155,29 @@ const ProductDetail = () => {
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    const numericValue = parseInt(inputValue, 10);
     
+    // Handle empty input
+    if (inputValue === '') {
+      return;
+    }
+    
+    const numericValue = Number(inputValue);
+    
+    // Validate and set quantity
+    if (!isNaN(numericValue) && numericValue >= 1 && numericValue <= maxQuantity) {
+      setQuantity(numericValue);
+    }
+  };
+
+  const handleQuantityBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    const numericValue = Number(inputValue);
+    
+    // If invalid input, reset to valid range
     if (isNaN(numericValue) || numericValue < 1) {
       setQuantity(1);
     } else if (numericValue > maxQuantity) {
       setQuantity(maxQuantity);
-    } else {
-      setQuantity(numericValue);
     }
   };
 
@@ -252,11 +269,12 @@ const ProductDetail = () => {
                     >
                       -
                     </button>
-                    <input
+                    <Input
                       type="number"
                       value={quantity}
                       onChange={handleQuantityChange}
-                      className="px-4 py-2 border-x min-w-[60px] text-center outline-none"
+                      onBlur={handleQuantityBlur}
+                      className="border-0 border-x min-w-[60px] text-center rounded-none focus-visible:ring-0"
                       min="1"
                       max={maxQuantity}
                     />
