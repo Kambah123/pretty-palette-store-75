@@ -23,22 +23,69 @@ const Products = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Set initial category filter if coming from URL
-  useEffect(() => {
-    if (category) {
-      const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
-      setSelectedCategories([formattedCategory]);
+  // Generate category-specific products for makeup and skincare routes
+  const getCategoryProducts = () => {
+    if (category === 'makeup') {
+      const makeupProducts = [];
+      for (let i = 1; i <= 45; i++) {
+        const imageNumber = i.toString().padStart(4, '0');
+        makeupProducts.push({
+          id: i,
+          name: `Premium Makeup Product ${i}`,
+          description: `High-quality makeup product with premium ingredients and long-lasting formula.`,
+          price: 1200 + Math.floor(Math.random() * 2800),
+          category: 'makeup',
+          brand: 'Pretty Palette',
+          images: [`/images/product_${imageNumber}.jpg`],
+          stock_quantity: Math.floor(Math.random() * 50) + 10,
+          status: 'active',
+          created_at: new Date().toISOString()
+        });
+      }
+      return makeupProducts;
+    } else if (category === 'skincare') {
+      const skincareProducts = [];
+      for (let i = 46; i <= 115; i++) {
+        const imageNumber = i.toString().padStart(4, '0');
+        skincareProducts.push({
+          id: i,
+          name: `Premium Skincare Product ${i}`,
+          description: `Nourishing skincare product formulated with natural ingredients to enhance your skin's natural beauty and health.`,
+          price: 1500 + Math.floor(Math.random() * 3500),
+          category: 'skincare',
+          brand: 'Pretty Palette',
+          images: [`/images/product_${imageNumber}.jpg`],
+          stock_quantity: Math.floor(Math.random() * 50) + 10,
+          status: 'active',
+          created_at: new Date().toISOString()
+        });
+      }
+      return skincareProducts;
     }
-  }, [category]);
+    return null;
+  };
 
-  const { data: products = [], isLoading, error } = useProducts({
-    category: category,
+  // Use category-specific products if available, otherwise use the hook
+  const categoryProducts = getCategoryProducts();
+  const { data: hookProducts = [], isLoading, error } = useProducts({
+    category: category && !categoryProducts ? category : undefined,
     searchTerm: searchTerm,
     sortBy: sortBy,
     priceRange: priceRange,
     brands: selectedBrands,
     categories: selectedCategories
   });
+
+  // Use category products if available, otherwise use hook products
+  const products = categoryProducts || hookProducts;
+
+  // Set initial category filter if coming from URL
+  useEffect(() => {
+    if (category && !categoryProducts) {
+      const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+      setSelectedCategories([formattedCategory]);
+    }
+  }, [category, categoryProducts]);
 
   // Get unique brands and categories from products
   const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
@@ -51,7 +98,7 @@ const Products = () => {
     setPriceRange([0, 10000]);
   };
 
-  if (error) {
+  if (error && !categoryProducts) {
     console.error('Products loading error:', error);
     return (
       <div className="min-h-screen bg-gray-50">
@@ -179,7 +226,7 @@ const Products = () => {
 
             <ProductGrid
               products={products}
-              isLoading={isLoading}
+              isLoading={categoryProducts ? false : isLoading}
               onClearFilters={handleClearFilters}
             />
           </div>
