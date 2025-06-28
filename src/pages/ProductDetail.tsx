@@ -388,7 +388,7 @@ const ProductDetail = () => {
 
         {/* Enhanced Reviews Section */}
         <ProductRatingSystem 
-          productId={product.id}
+          productId={Number(product.id)}
           averageRating={4.5}
           totalReviews={25}
           reviews={mockReviews}
