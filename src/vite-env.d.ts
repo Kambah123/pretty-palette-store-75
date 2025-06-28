@@ -6,3 +6,5 @@ declare global {
     imageUrls?: string[];
   }
 }
+
+export {};
