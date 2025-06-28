@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -222,7 +221,7 @@ const ProductDetail = () => {
                   <div className="flex items-center border rounded-md">
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      onClick={() => setQuantity(Math.max(1, Number(quantity) - 1))}
                       disabled={quantity <= 1}
                     >
                       -
@@ -230,7 +229,7 @@ const ProductDetail = () => {
                     <span className="px-4 py-2 border-x min-w-[60px] text-center">{quantity}</span>
                     <button 
                       className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50"
-                      onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
+                      onClick={() => setQuantity(Math.min(maxQuantity, Number(quantity) + 1))}
                       disabled={quantity >= maxQuantity}
                     >
                       +
