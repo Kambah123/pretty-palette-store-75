@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -214,7 +212,7 @@ const ProductDetail = () => {
             <ProductImageGallery 
               images={productImages} 
               productName={product.name}
-              productId={product.id}
+              productId={product.id.toString()}
             />
           </div>
 
@@ -401,7 +399,7 @@ const ProductDetail = () => {
 
         {/* Related Products */}
         <div className="mt-12">
-          <RelatedProducts currentProductId={product.id} category={product.category} />
+          <RelatedProducts currentProductId={product.id.toString()} category={product.category} />
         </div>
       </div>
     </div>

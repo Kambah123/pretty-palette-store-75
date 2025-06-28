@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Eye } from 'lucide-react';
 
 const ProductGallery = () => {
-  // Generate array of product data with names and prices
+  // Generate array of first 10 products only for a cleaner home page
   const productImages = [];
-  for (let i = 1; i <= 115; i++) {
+  for (let i = 1; i <= 10; i++) {
     const imageNumber = i.toString().padStart(4, '0');
-    const isSkincareProduct = i >= 46;
+    const isSkincareProduct = i >= 6; // Adjust for smaller sample
     const basePrice = isSkincareProduct ? 1500 : 1200;
     const randomPrice = basePrice + Math.floor(Math.random() * 2000);
     
@@ -31,11 +31,11 @@ const ProductGallery = () => {
             Our Product Gallery
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Browse through our extensive collection of {productImages.length} premium products.
+            Browse through our curated selection of premium products. Discover over 115+ products in our full collection.
           </p>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {productImages.map((product) => (
             <Card 
               key={`product-${product.id}`}
@@ -99,7 +99,7 @@ const ProductGallery = () => {
         <div className="text-center mt-12">
           <Link to="/products">
             <Button size="lg" className="bg-pink-600 hover:bg-pink-700">
-              View All Products
+              View All 115+ Products
             </Button>
           </Link>
         </div>
